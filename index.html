@@ -353,6 +353,17 @@ const GAMES = [
   { id:'2048', title:'2048', emoji:'🔢', category:'classic', span:false },
   { id:'snake', title:'Snake', emoji:'🐍', category:'arcade', span:true },
   { id:'bugpop', title:'Bug Pop', emoji:'🐛', category:'reflex', span:false },
+
+  { id:'flappy', title:'Flappy Box', emoji:'🐦', category:'arcade', span:true },
+  { id:'breakout', title:'Brick Breaker', emoji:'🧱', category:'classic', span:false },
+  { id:'minesweeper', title:'Minesweeper', emoji:'💣', category:'puzzle', span:false },
+  { id:'reaction', title:'Reaction Test', emoji:'⚡', category:'reflex', span:false },
+  { id:'colormatch', title:'Color Match', emoji:'🎨', category:'puzzle', span:false },
+  { id:'mathquiz', title:'Math Quiz', emoji:'➕', category:'puzzle', span:false },
+  { id:'clicker', title:'Cookie Clicker', emoji:'🍪', category:'strategy', span:true },
+  { id:'simon', title:'Simon Says', emoji:'🔲', category:'memory', span:false },
+  { id:'wordscramble', title:'Word Scramble', emoji:'📝', category:'puzzle', span:false },
+  { id:'rps', title:'Rock Paper', emoji:'✂️', category:'strategy', span:false },
 ];
 
 /* ============ Navigation ============ */
@@ -473,7 +484,9 @@ document.getElementById('searchBar').addEventListener('input', (e) => {
   renderGrid(e.target.value);
 });
 
-const GAME_MODULES = {};\n\nGAME_MODULES.rps = function(container, api){
+const GAME_MODULES = {};
+
+GAME_MODULES.rps = function(container, api){
   const div = document.createElement('div'); div.style="text-align:center; color:white;";
   let score = 0;
   let h2 = document.createElement('h2'); h2.textContent = "Choose your weapon";
@@ -494,7 +507,9 @@ const GAME_MODULES = {};\n\nGAME_MODULES.rps = function(container, api){
   
   div.appendChild(h2); div.appendChild(box); container.appendChild(div);
   return { restart(){ score=0; h2.textContent="Choose your weapon"; api.setScore('Streak 0'); }, destroy(){} };
-};\n\nGAME_MODULES.wordscramble = function(container, api){
+};
+
+GAME_MODULES.wordscramble = function(container, api){
   const div = document.createElement('div'); div.style="text-align:center; color:white;";
   const words = ['JAVASCRIPT','HTML','GITHUB','ARCADE','REACT','VERCEL','CODING'];
   let w, score=0, over=false;
@@ -518,7 +533,9 @@ const GAME_MODULES = {};\n\nGAME_MODULES.rps = function(container, api){
   
   div.appendChild(h1); div.appendChild(input); container.appendChild(div); reset();
   return { restart: reset, destroy(){} };
-};\n\nGAME_MODULES.simon = function(container, api){
+};
+
+GAME_MODULES.simon = function(container, api){
   const grid = document.createElement('div'); grid.style="display:grid; grid-template-columns:100px 100px; gap:10px;";
   let seq = [], step = 0, playing = false, tId;
   const colors = ['#e74c3c','#3498db','#f1c40f','#2ecc71'], btns = [];
@@ -544,7 +561,9 @@ const GAME_MODULES = {};\n\nGAME_MODULES.rps = function(container, api){
   
   container.appendChild(grid); reset();
   return { restart: reset, destroy(){} };
-};\n\nGAME_MODULES.clicker = function(container, api){
+};
+
+GAME_MODULES.clicker = function(container, api){
   const div = document.createElement('div'); div.style="text-align:center; color:white;";
   let count = 0, auto = 0, cost = 10, loopId;
   let cookie = document.createElement('div'); cookie.style="font-size:100px; cursor:pointer; user-select:none; transition:transform 0.1s;";
@@ -559,7 +578,9 @@ const GAME_MODULES = {};\n\nGAME_MODULES.rps = function(container, api){
   div.appendChild(cookie); div.appendChild(shop); container.appendChild(div);
   loopId = setInterval(()=>{ if(auto>0){ count+=auto; api.setScore('Cookies: '+count); } }, 1000);
   reset(); return { restart: reset, destroy(){ clearInterval(loopId); } };
-};\n\nGAME_MODULES.mathquiz = function(container, api){
+};
+
+GAME_MODULES.mathquiz = function(container, api){
   const div = document.createElement('div'); div.style="text-align:center;";
   let qEl = document.createElement('h2'); qEl.style="font-size:40px; color:white;";
   let ansEl = document.createElement('div'); ansEl.style="display:flex; gap:10px; justify-content:center;";
@@ -580,7 +601,9 @@ const GAME_MODULES = {};\n\nGAME_MODULES.rps = function(container, api){
   function reset(){ clearTimeout(tId); score=0; over=false; api.setScore('Score 0'); next(); }
   div.appendChild(qEl); div.appendChild(ansEl); container.appendChild(div); reset();
   return { restart: reset, destroy(){ clearTimeout(tId); } };
-};\n\nGAME_MODULES.colormatch = function(container, api){
+};
+
+GAME_MODULES.colormatch = function(container, api){
   const div = document.createElement('div');
   div.style = "text-align:center; color:white;";
   let score = 0, colors = ['Red','Blue','Green','Yellow'], over = false;
@@ -604,7 +627,9 @@ const GAME_MODULES = {};\n\nGAME_MODULES.rps = function(container, api){
   function reset(){ clearTimeout(tId); score=0; over=false; api.setScore('Match the color, not the word!'); next(); }
   div.appendChild(wordEl); div.appendChild(btnBox); container.appendChild(div); reset();
   return { restart: reset, destroy(){ clearTimeout(tId); } };
-};\n\nGAME_MODULES.reaction = function(container, api){
+};
+
+GAME_MODULES.reaction = function(container, api){
   const btn = document.createElement('button');
   btn.style = "width:250px; height:250px; border-radius:50%; border:none; font-size:24px; font-weight:bold; cursor:pointer; background:#e74c3c; color:white; box-shadow:0 10px 20px rgba(0,0,0,0.3);";
   let state = 'waiting', start, tId;
@@ -622,7 +647,9 @@ const GAME_MODULES = {};\n\nGAME_MODULES.rps = function(container, api){
   
   container.appendChild(btn); reset();
   return { restart: reset, destroy(){ clearTimeout(tId); } };
-};\n\nGAME_MODULES.minesweeper = function(container, api){
+};
+
+GAME_MODULES.minesweeper = function(container, api){
   const grid = document.createElement('div');
   grid.style = "display:grid; grid-template-columns:repeat(8, 35px); gap:2px; background:#444; padding:5px; border-radius:8px;";
   let board = [], over = false, won = false, score = 0;
@@ -656,7 +683,9 @@ const GAME_MODULES = {};\n\nGAME_MODULES.rps = function(container, api){
   
   container.appendChild(grid); reset();
   return { restart: reset, destroy(){} };
-};\n\nGAME_MODULES.breakout = function(container, api){
+};
+
+GAME_MODULES.breakout = function(container, api){
   const canvas = document.createElement('canvas');
   canvas.width = 400; canvas.height = 300;
   canvas.style = "background:#111; border-radius:12px; touch-action:none; z-index:5; width:100%; max-width:400px;";
@@ -697,7 +726,9 @@ const GAME_MODULES = {};\n\nGAME_MODULES.rps = function(container, api){
 
   container.appendChild(canvas); reset(); loopId = setInterval(tick, 16);
   return { restart: reset, destroy(){ clearInterval(loopId); }};
-};\n\nGAME_MODULES.flappy = function(container, api){
+};
+
+GAME_MODULES.flappy = function(container, api){
   const canvas = document.createElement('canvas');
   canvas.width = 300; canvas.height = 400;
   canvas.style = "background:#71c5cf; border-radius:12px; touch-action:none; z-index:5;";

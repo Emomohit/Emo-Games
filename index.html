@@ -393,12 +393,12 @@ function createTile(g, isSide = false) {
   tile.className = isSide ? 'side-tile' : 'tile';
   if (!isSide && g.span) tile.classList.add('tile-span-2');
   tile.classList.add(getBgClass(g.id));
-  tile.innerHTML = \`
-    \${g.emoji}
+  tile.innerHTML = `
+    ${g.emoji}
     <div class="overlay">
-      <h3 class="tile-title">\${g.title}</h3>
+      <h3 class="tile-title">${g.title}</h3>
     </div>
-  \`;
+  `;
   tile.onclick = () => openGame(g.id);
   return tile;
 }
@@ -446,7 +446,7 @@ function openGame(id){
   viewHome.classList.remove('active');
   viewPlayer.classList.add('active');
   
-  titleEl.innerHTML = \`\${def.emoji} \${def.title}\`;
+  titleEl.innerHTML = `${def.emoji} ${def.title}`;
   
   relatedSidebar.innerHTML = '';
   const others = [...GAMES].sort(()=>0.5-Math.random()).filter(g=>g.id!==id).slice(0, 4);
@@ -461,7 +461,7 @@ function launch(id){
   scoreEl.textContent = 'Initializing...';
   
   if(!GAME_MODULES[id]) {
-    screenEl.innerHTML = \`<h2 style="color:white">Game not implemented yet!</h2>\`;
+    screenEl.innerHTML = `<h2 style="color:white">Game not implemented yet!</h2>`;
     return;
   }
   

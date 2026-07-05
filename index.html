@@ -1330,6 +1330,28 @@ GAME_MODULES.stack = function(container, api){
     destroy(){}
   };
 };
+
+/* ============ 2048 ============ */
+GAME_MODULES['2048'] = function(container, api){
+  const iframe = document.createElement('iframe');
+  iframe.src = './2048_Game/index.html';
+  iframe.allow = 'fullscreen';
+  iframe.style.width = '100%';
+  iframe.style.height = '65vh';
+  iframe.style.minHeight = '400px';
+  iframe.style.border = 'none';
+  iframe.style.borderRadius = '12px';
+  iframe.style.backgroundColor = '#000';
+  container.appendChild(iframe);
+  api.setScore(''); 
+
+  return {
+    restart(){
+      iframe.src = iframe.src;
+    },
+    destroy(){}
+  };
+};
 </script>
 
 </body>

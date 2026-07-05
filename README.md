@@ -40,3 +40,5 @@ Since the entire arcade runs entirely on the client side:
 
 ---
 *Premium, fast, and completely ad-free.*
+
+ 

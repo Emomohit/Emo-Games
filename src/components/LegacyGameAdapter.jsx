@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import GAME_MODULES from '../utils/legacyGames.js';
+import GAME_MODULES from '../games/legacy/index.js';
 
 const LegacyGameAdapter = ({ gameId, setScore }) => {
   const containerRef = useRef(null);

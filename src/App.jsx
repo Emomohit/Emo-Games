@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { CATEGORIES, GAMES, getBgClass } from './utils/constants.js';
 import LegacyGameAdapter from './components/LegacyGameAdapter.jsx';
 import PingPong from './games/PingPong.jsx';
+import Sidebar from './components/Sidebar.jsx';
+import Topbar from './components/Topbar.jsx';
 
 function App() {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -31,44 +33,26 @@ function App() {
     setActiveGameId(null);
   };
 
+  const handleHomeAction = () => {
+    if (activeGameId) handleBackToHome();
+  };
+
   return (
     <>
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="sidebar-logo" onClick={handleBackToHome}>P</div>
-        <div>
-          {CATEGORIES.map(cat => (
-            <button 
-              key={cat.id}
-              className={`cat-btn ${activeCategory === cat.id ? 'active' : ''}`}
-              title={cat.title}
-              onClick={() => {
-                setActiveCategory(cat.id);
-                setSearchQuery('');
-                if (activeGameId) handleBackToHome();
-              }}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-      </aside>
+      <Sidebar 
+        activeCategory={activeCategory} 
+        setActiveCategory={setActiveCategory} 
+        setSearchQuery={setSearchQuery}
+        onHome={handleHomeAction}
+      />
 
       {/* Main Content */}
       <main className="main-area">
-        {/* Topbar */}
-        <header className="topbar">
-          <input 
-            type="text" 
-            className="search-bar" 
-            placeholder="Search for games..." 
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              if (activeGameId) handleBackToHome();
-            }}
-          />
-        </header>
+        <Topbar 
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          onHome={handleHomeAction}
+        />
 
         {/* View Router */}
         {!activeGameId ? (

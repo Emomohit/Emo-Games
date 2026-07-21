@@ -4,6 +4,7 @@ import LegacyGameAdapter from './components/LegacyGameAdapter.jsx';
 import PingPong from './games/PingPong.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import Topbar from './components/Topbar.jsx';
+import GameGrid from './components/GameGrid.jsx';
 
 function App() {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -57,23 +58,11 @@ function App() {
         {/* View Router */}
         {!activeGameId ? (
           /* Grid View (Home) */
-          <div className="view">
-            <h1 className="grid-header">{getSidebarTitle()}</h1>
-            <div className="grid">
-              {filteredGames.map(g => (
-                <div 
-                  key={g.id} 
-                  className={`tile ${getBgClass(g.id)} ${g.span ? 'tile-span-2' : ''}`}
-                  onClick={() => handleOpenGame(g.id)}
-                >
-                  {g.emoji}
-                  <div className="overlay">
-                    <h3 className="tile-title">{g.title}</h3>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <GameGrid 
+            title={getSidebarTitle()}
+            games={filteredGames}
+            onOpenGame={handleOpenGame}
+          />
         ) : (
           /* Player View */
           <div className="view">

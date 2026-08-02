@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "project": {
+    "name": "emo-games-os",
+    "productType": null,
+    "stack": [
+      "react",
+      "vite"
+    ]
+  },
+  "sources": {
+    "tokens": [
+      "src/index.css"
+    ],
+    "components": [],
+    "assets": [],
+    "instructions": []
+  },
+  "design": {
+    "colorMode": "light",
+    "colors": {
+      "--text-muted": {
+        "value": "#888888",
+        "source": "src/index.css"
+      },
+      "--primary": {
+        "value": "#3498db",
+        "source": "src/index.css"
+      },
+      "--border": {
+        "value": "#e0e0e0",
+        "source": "src/index.css"
+      }
+    },
+    "typography": {
+      "--text-main": {
+        "value": "#333333",
+        "source": "src/index.css"
+      },
+      "--font": {
+        "value": "'Nunito', 'Segoe UI', system-ui, sans-serif",
+        "source": "src/index.css"
+      }
+    },
+    "spacing": {},
+    "radius": {
+      "--radius-tile": {
+        "value": "20px",
+        "source": "src/index.css"
+      }
+    },
+    "shadows": {},
+    "motion": {},
+    "density": "unknown"
+  },
+  "components": {
+    "installed": [],
+    "preferredPrimitives": [],
+    "patterns": []
+  },
+  "constraints": {
+    "must": [],
+    "avoid": []
+  },
+  "decisions": [],
+  "evidence": [
+    {
+      "fact": "design.colorMode:light",
+      "source": "src/index.css"
+    },
+    {
+      "fact": "design.tokens",
+      "source": "src/index.css"
+    },
+    {
+      "fact": "project.stack:react",
+      "source": "package.json"
+    },
+    {
+      "fact": "project.stack:vite",
+      "source": "package.json"
+    }
+  ],
+  "generatedAt": "2026-08-02T17:19:38.095Z"
+}

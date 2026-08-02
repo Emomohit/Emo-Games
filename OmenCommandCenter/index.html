@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OMEN COMMAND CENTER</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            omen: {
+              black: '#070709',
+              dark: '#0C0C0F',
+              card: '#121217',
+              border: '#1E1E26',
+              red: '#FF1E27',
+              violet: '#9D00FF',
+              cyan: '#00F0FF',
+              amber: '#FF9900',
+              green: '#00FF66',
+            }
+          },
+          fontFamily: {
+            display: ['Rajdhani', 'Orbitron', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Styles & Exact Reference Styling -->
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #070709;
+      color: #D1D5DB;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* Ambient Outer Glow Effect */
+    .ambient-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: 
+        radial-gradient(circle at 0% 0%, rgba(255, 30, 39, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 100% 100%, rgba(0, 240, 255, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(157, 0, 255, 0.05) 0%, transparent 60%);
+    }
+
+    /* Reference Card Styling */
+    .card-panel {
+      background: rgba(14, 14, 18, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid #1E1E26;
+      border-radius: 10px;
+    }
+
+    .card-panel-active {
+      border-color: #FF1E27;
+      box-shadow: 0 0 15px rgba(255, 30, 39, 0.3);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #070709;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2D2D38;
+      border-radius: 2px;
+    }
+
+    /* Key Switch Render */
+    .kbd-key {
+      background: #181820;
+      border: 1px solid #2A2A36;
+      border-radius: 3px;
+      color: #9CA3AF;
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .kbd-key:hover {
+      background: #252532;
+      color: #FFF;
+    }
+    .kbd-key.lit-red {
+      background: rgba(255, 30, 39, 0.25);
+      border-color: #FF1E27;
+      color: #FFF;
+      box-shadow: 0 0 8px rgba(255, 30, 39, 0.6);
+    }
+    .kbd-key.lit-cyan {
+      background: rgba(0, 240, 255, 0.25);
+      border-color: #00F0FF;
+      color: #FFF;
+      box-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+    }
+    .kbd-key.lit-violet {
+      background: rgba(157, 0, 255, 0.25);
+      border-color: #9D00FF;
+      color: #FFF;
+      box-shadow: 0 0 8px rgba(157, 0, 255, 0.6);
+    }
+
+    /* Fan Animation */
+    @keyframes spin-fan {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .fan-spinning {
+      animation: spin-fan 1s linear infinite;
+    }
+
+    /* Switch Toggle */
+    .switch-track {
+      width: 40px;
+      height: 20px;
+      background: #252530;
+      border-radius: 10px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .switch-track.active-red {
+      background: #FF1E27;
+      box-shadow: 0 0 10px rgba(255, 30, 39, 0.5);
+    }
+    .switch-track.active-violet {
+      background: #9D00FF;
+      box-shadow: 0 0 10px rgba(157, 0, 255, 0.5);
+    }
+    .switch-thumb {
+      width: 16px;
+      height: 16px;
+      background: #FFF;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s ease;
+    }
+    .switch-track.active-red .switch-thumb,
+    .switch-track.active-violet .switch-thumb {
+      transform: translateX(20px);
+    }
+
+    /* Range inputs */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      height: 4px;
+      background: #252530;
+      border-radius: 2px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #FF1E27;
+      margin-top: -5px;
+      box-shadow: 0 0 8px #FF1E27;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="min-h-screen relative flex flex-col justify-between p-3 gap-3">
+  
+  <div class="ambient-glow"></div>
+
+  <!-- CONTAINER GRID -->
+  <div class="relative z-10 grid grid-cols-12 gap-3 flex-1 max-w-[1920px] mx-auto w-full">
+
+    <!-- 1. LEFT NAVIGATION SIDEBAR (2 COLS) -->
+    <aside class="col-span-12 lg:col-span-2 card-panel p-3 flex flex-col justify-between">
+      <div>
+        <!-- Brand Logo -->
+        <div class="flex items-center gap-3 mb-6 px-1">
+          <svg viewBox="0 0 100 100" class="w-7 h-7 fill-current text-omen-red filter drop-shadow-[0_0_8px_#FF1E27]">
+            <polygon points="50,5 95,50 50,95 5,50" />
+          </svg>
+          <div>
+            <h1 class="font-display font-extrabold text-white text-lg tracking-wider leading-none">OMEN</h1>
+            <span class="text-[9px] font-mono text-gray-500 tracking-widest block mt-0.5">COMMAND CENTER</span>
+          </div>
+        </div>
+
+        <!-- Vertical Tab List -->
+        <nav class="space-y-1 font-display font-semibold text-xs tracking-wider">
+          <a href="#" onclick="switchTab('dashboard')" id="tab-dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gradient-to-r from-omen-red to-omen-red/60 text-white font-bold shadow-lg shadow-omen-red/20">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i> DASHBOARD
+          </a>
+          <a href="#" onclick="switchTab('performance')" id="tab-performance" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+            <i data-lucide="gauge" class="w-4 h-4"></i> PERFORMANCE
+          </a>
+          <a href="#" onclick="switchTab('fan')" id="tab-fan" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+            <i data-lucide="fan" class="w-4 h-4"></i> FAN CONTROL
+          </a>
+          <a href="#" onclick="switchTab('rgb')" id="tab-rgb" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+            <i data-lucide="palette" class="w-4 h-4"></i> RGB STUDIO
+          </a>
+          <a href="#" onclick="switchTab('power')" id="tab-power" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+            <i data-lucide="sliders" class="w-4 h-4"></i> POWER OPTIONS
+          </a>
+          <a href="#" onclick="switchTab('info')" id="tab-info" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+            <i data-lucide="info" class="w-4 h-4"></i> SYSTEM INFO
+          </a>
+          <a href="#" onclick="switchTab('benchmark')" id="tab-benchmark" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+            <i data-lucide="bar-chart-2" class="w-4 h-4"></i> BENCHMARK
+          </a>
+          <a href="#" onclick="switchTab('optimizer')" id="tab-optimizer" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+            <i data-lucide="shield-check" class="w-4 h-4"></i> GAME OPTIMIZER
+          </a>
+          <a href="#" onclick="switchTab('settings')" id="tab-settings" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+            <i data-lucide="settings" class="w-4 h-4"></i> SETTINGS
+          </a>
+        </nav>
+      </div>
+
+      <!-- Bottom Laptop Preview Card -->
+      <div class="mt-4 pt-4 border-t border-white/10 flex flex-col items-center text-center gap-2">
+        <div class="w-24 h-14 relative flex items-center justify-center">
+          <svg viewBox="0 0 200 130" class="w-full h-full text-gray-700 fill-current">
+            <rect x="25" y="15" width="150" height="95" rx="6" class="stroke-omen-red stroke-2 fill-gray-900" />
+            <polygon points="40,25 160,25 160,95 40,95" class="fill-black" />
+            <polygon points="100,35 120,55 100,75 80,55" class="fill-omen-red/60" />
+            <path d="M10,115 L190,115 C194,115 197,119 194,123 L185,128 L15,128 L6,123 C3,119 6,115 10,115 Z" class="fill-gray-800" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-white text-xs tracking-wider">OMEN LAPTOP</h3>
+          <p class="text-[10px] font-mono text-gray-400">16-wf1xxx</p>
+        </div>
+        <select class="w-full bg-black/60 border border-white/10 rounded px-2 py-1 text-[10px] font-mono text-gray-300 focus:outline-none">
+          <option>Default Profile</option>
+          <option>Gaming Mode</option>
+          <option>Silent Battery</option>
+        </select>
+      </div>
+    </aside>
+
+    <!-- 2. CENTER & RIGHT MAIN WORKSPACE (10 COLS) -->
+    <main class="col-span-12 lg:col-span-10 flex flex-col gap-3">
+      
+      <!-- TOP STATUS BAR & ALERTS ROW -->
+      <div class="grid grid-cols-12 gap-3">
+        
+        <!-- Top Status Bar (8 Cols) -->
+        <header class="col-span-12 lg:col-span-9 card-panel p-2.5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+          <div class="flex items-center gap-2">
+            <span class="text-gray-400">POWER DRAW</span>
+            <span id="val-power" class="text-omen-red font-bold text-sm">136 W</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <i data-lucide="plug" class="w-4 h-4 text-omen-green"></i>
+            <span class="text-gray-400">POWER SOURCE</span>
+            <span class="text-white font-bold">AC</span>
+          </div>
+
+          <div class="flex items-center gap-1.5 bg-black/40 p-1 rounded border border-white/10">
+            <span class="text-gray-400 px-1">GPU MODE</span>
+            <button id="btn-hybrid" onclick="setGpuMode('hybrid')" class="px-2.5 py-0.5 rounded text-[10px] font-bold text-gray-400 hover:text-white">HYBRID</button>
+            <button id="btn-discrete" onclick="setGpuMode('discrete')" class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-omen-red/20 border border-omen-red text-white">DISCRETE</button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="text-gray-400">THROTTLE STATUS</span>
+            <span class="text-omen-green font-bold flex items-center gap-1">
+              OK <span class="w-2 h-2 rounded-full bg-omen-green shadow-[0_0_6px_#00FF66]"></span>
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="text-gray-400">BIOS VERSION</span>
+            <span class="px-2 py-0.5 bg-white/5 rounded border border-white/10 text-white font-bold">F.39</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span id="top-clock" class="text-white font-bold tracking-wider">10:42:36 PM</span>
+            <i data-lucide="bell" class="w-4 h-4 text-gray-400 hover:text-white cursor-pointer"></i>
+          </div>
+        </header>
+
+        <!-- Top Right Warning Box (3 Cols) -->
+        <div class="col-span-12 lg:col-span-3 card-panel p-2.5 bg-omen-red/10 border-omen-red/40 flex items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-omen-red animate-pulse flex-shrink-0"></i>
+            <div class="leading-tight">
+              <span class="font-bold text-omen-red block">GPU Temp High – 85°C</span>
+              <span class="text-[10px] text-gray-400">High temp on RTX 4060 GPU.</span>
+            </div>
+          </div>
+          <button onclick="dismissAlert()" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+
+      </div>
+
+      <!-- MAIN MIDDLE DASHBOARD CONTENT (2 SUB-COLUMNS: CENTER 9 COLS, RIGHT SIDEBAR 3 COLS) -->
+      <div class="grid grid-cols-12 gap-3 flex-1">
+        
+        <!-- CENTER MODULES (9 COLS) -->
+        <div class="col-span-12 lg:col-span-9 flex flex-col gap-3">
+          
+          <!-- MODULE 1: THERMAL OVERVIEW -->
+          <div class="card-panel p-3.5">
+            <h2 class="font-display font-bold text-white text-xs tracking-wider flex items-center gap-2 mb-3">
+              <i data-lucide="thermometer" class="w-4 h-4 text-omen-red"></i> THERMAL OVERVIEW
+            </h2>
+
+            <!-- 5 Gauges Grid -->
+            <div class="grid grid-cols-5 gap-2 mb-3">
+              <!-- CPU -->
+              <div class="bg-black/40 border border-white/10 rounded-lg p-2 flex flex-col items-center relative">
+                <svg class="w-16 h-16 transform -rotate-90">
+                  <circle cx="32" cy="32" r="26" stroke="#252530" stroke-width="4" fill="transparent" />
+                  <circle id="gauge-cpu" cx="32" cy="32" r="26" stroke="#FF1E27" stroke-width="4" stroke-dasharray="163" stroke-dashoffset="45" stroke-linecap="round" fill="transparent" class="transition-all duration-500" />
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <span id="val-cpu-temp" class="font-mono font-bold text-sm text-white">72°C</span>
+                  <span class="text-[9px] font-mono text-gray-500">CPU</span>
+                </div>
+                <span class="text-[9px] font-mono text-gray-500 mt-1">Max 92°C</span>
+              </div>
+
+              <!-- GPU -->
+              <div class="bg-black/40 border border-white/10 rounded-lg p-2 flex flex-col items-center relative">
+                <svg class="w-16 h-16 transform -rotate-90">
+                  <circle cx="32" cy="32" r="26" stroke="#252530" stroke-width="4" fill="transparent" />
+                  <circle id="gauge-gpu" cx="32" cy="32" r="26" stroke="#FF9900" stroke-width="4" stroke-dasharray="163" stroke-dashoffset="25" stroke-linecap="round" fill="transparent" class="transition-all duration-500" />
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <span id="val-gpu-temp" class="font-mono font-bold text-sm text-amber-400">85°C</span>
+                  <span class="text-[9px] font-mono text-gray-500">GPU</span>
+                </div>
+                <span class="text-[9px] font-mono text-gray-500 mt-1">Max 95°C</span>
+              </div>
+
+              <!-- VRM -->
+              <div class="bg-black/40 border border-white/10 rounded-lg p-2 flex flex-col items-center relative">
+                <svg class="w-16 h-16 transform -rotate-90">
+                  <circle cx="32" cy="32" r="26" stroke="#252530" stroke-width="4" fill="transparent" />
+                  <circle id="gauge-vrm" cx="32" cy="32" r="26" stroke="#9D00FF" stroke-width="4" stroke-dasharray="163" stroke-dashoffset="55" stroke-linecap="round" fill="transparent" class="transition-all duration-500" />
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <span id="val-vrm-temp" class="font-mono font-bold text-sm text-purple-300">68°C</span>
+                  <span class="text-[9px] font-mono text-gray-500">VRM</span>
+                </div>
+                <span class="text-[9px] font-mono text-gray-500 mt-1">Max 88°C</span>
+              </div>
+
+              <!-- RAM -->
+              <div class="bg-black/40 border border-white/10 rounded-lg p-2 flex flex-col items-center relative">
+                <svg class="w-16 h-16 transform -rotate-90">
+                  <circle cx="32" cy="32" r="26" stroke="#252530" stroke-width="4" fill="transparent" />
+                  <circle id="gauge-ram" cx="32" cy="32" r="26" stroke="#00F0FF" stroke-width="4" stroke-dasharray="163" stroke-dashoffset="75" stroke-linecap="round" fill="transparent" class="transition-all duration-500" />
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <span id="val-ram-temp" class="font-mono font-bold text-sm text-omen-cyan">54°C</span>
+                  <span class="text-[9px] font-mono text-gray-500">RAM</span>
+                </div>
+                <span class="text-[9px] font-mono text-gray-500 mt-1">Max 74°C</span>
+              </div>
+
+              <!-- SSD -->
+              <div class="bg-black/40 border border-white/10 rounded-lg p-2 flex flex-col items-center relative">
+                <svg class="w-16 h-16 transform -rotate-90">
+                  <circle cx="32" cy="32" r="26" stroke="#252530" stroke-width="4" fill="transparent" />
+                  <circle id="gauge-ssd" cx="32" cy="32" r="26" stroke="#3B82F6" stroke-width="4" stroke-dasharray="163" stroke-dashoffset="85" stroke-linecap="round" fill="transparent" class="transition-all duration-500" />
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <span id="val-ssd-temp" class="font-mono font-bold text-sm text-blue-400">49°C</span>
+                  <span class="text-[9px] font-mono text-gray-500">SSD</span>
+                </div>
+                <span class="text-[9px] font-mono text-gray-500 mt-1">Max 65°C</span>
+              </div>
+            </div>
+
+            <!-- Real-Time Line Graph Strip -->
+            <div class="relative h-20 bg-black/60 rounded-lg border border-white/10 p-1">
+              <canvas id="canvas-thermal-strip" class="w-full h-full"></canvas>
+              <div class="absolute bottom-1 left-2 right-2 flex justify-between font-mono text-[9px] text-gray-500 pointer-events-none">
+                <span>60 SECONDS</span>
+                <div class="flex gap-3">
+                  <span class="text-omen-red">■ CPU</span>
+                  <span class="text-amber-400">■ GPU</span>
+                  <span class="text-purple-400">■ VRM</span>
+                  <span class="text-omen-cyan">■ RAM</span>
+                  <span class="text-blue-400">■ SSD</span>
+                </div>
+                <span>NOW</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- MODULE 2: PERFORMANCE GRAPHS (5 SIDE-BY-SIDE CARDS) -->
+          <div class="card-panel p-3.5">
+            <h2 class="font-display font-bold text-white text-xs tracking-wider flex items-center gap-2 mb-3">
+              <i data-lucide="activity" class="w-4 h-4 text-omen-cyan"></i> PERFORMANCE GRAPHS
+            </h2>
+
+            <div class="grid grid-cols-5 gap-2">
+              <!-- Card 1: CPU Clock -->
+              <div class="bg-black/40 border border-white/10 rounded-lg p-2 flex flex-col justify-between">
+                <div>
+                  <span class="text-[9px] font-mono text-gray-500 block">CPU CLOCK</span>
+                  <span id="val-cpu-clock" class="font-mono text-xs font-bold text-blue-400">3.42 GHz</span>
+                </div>
+                <div class="h-12 mt-1 relative">
+                  <canvas id="chart-cpu-clock" class="w-full h-full"></canvas>
+                </div>
+              </div>
+
+              <!-- Card 2: GPU Clock -->
+              <div class="bg-black/40 border border-white/10 rounded-lg p-2 flex flex-col justify-between">
+                <div>
+                  <span class="text-[9px] font-mono text-gray-500 block">GPU CLOCK</span>
+                  <span id="val-gpu-clock" class="font-mono text-xs font-bold text-omen-red">2310 MHz</span>
+                </div>
+                <div class="h-12 mt-1 relative">
+                  <canvas id="chart-gpu-clock" class="w-full h-full"></canvas>
+                </div>
+              </div>
+
+              <!-- Card 3: CPU Util -->
+              <div class="bg-black/40 border border-white/10 rounded-lg p-2 flex flex-col justify-between">
+                <div>
+                  <span class="text-[9px] font-mono text-gray-500 block">CPU UTILIZATION</span>
+                  <span id="val-cpu-util" class="font-mono text-xs font-bold text-omen-cyan">56 %</span>
+                </div>
+                <div class="h-12 mt-1 relative">
+                  <canvas id="chart-cpu-util" class="w-full h-full"></canvas>
+                </div>
+              </div>
+
+              <!-- Card 4: GPU Util -->
+              <div class="bg-black/40 border border-white/10 rounded-lg p-2 flex flex-col justify-between">
+                <div>
+                  <span class="text-[9px] font-mono text-gray-500 block">GPU UTILIZATION</span>
+                  <span id="val-gpu-util" class="font-mono text-xs font-bold text-amber-400">82 %</span>
+                </div>
+                <div class="h-12 mt-1 relative">
+                  <canvas id="chart-gpu-util" class="w-full h-full"></canvas>
+                </div>
+              </div>
+
+              <!-- Card 5: VRAM Usage -->
+              <div class="bg-black/40 border border-white/10 rounded-lg p-2 flex flex-col justify-between">
+                <div>
+                  <span class="text-[9px] font-mono text-gray-500 block">VRAM USAGE</span>
+                  <span id="val-vram-usage" class="font-mono text-xs font-bold text-purple-300">6.1 / 8GB</span>
+                </div>
+                <div class="h-12 mt-1 relative">
+                  <canvas id="chart-vram-usage" class="w-full h-full"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MODULE 3: DUAL GRID (FAN CONTROL CENTER + RGB KEYBOARD STUDIO) -->
+          <div class="grid grid-cols-12 gap-3">
+            
+            <!-- Fan Control Center (6 Cols) -->
+            <div class="col-span-12 md:col-span-6 card-panel p-3 flex flex-col justify-between">
+              <div>
+                <h3 class="font-display font-bold text-white text-xs tracking-wider flex items-center gap-2 mb-2">
+                  <i data-lucide="fan" class="w-4 h-4 text-omen-red"></i> FAN CONTROL CENTER
+                </h3>
+
+                <!-- Dual Fan RPM Dials & Presets -->
+                <div class="flex items-center justify-between gap-2 my-2">
+                  
+                  <div class="flex items-center gap-3">
+                    <!-- CPU Fan Dial -->
+                    <div class="flex flex-col items-center">
+                      <div class="w-14 h-14 rounded-full border-2 border-omen-cyan/50 bg-black/60 flex items-center justify-center">
+                        <i data-lucide="fan" id="icon-fan-cpu" class="w-7 h-7 text-omen-cyan fan-spinning"></i>
+                      </div>
+                      <span class="text-[9px] font-mono text-gray-500 mt-1">CPU FAN</span>
+                      <span id="val-fan-cpu" class="font-mono text-xs font-bold text-white">2340 RPM</span>
+                    </div>
+
+                    <!-- GPU Fan Dial -->
+                    <div class="flex flex-col items-center">
+                      <div class="w-14 h-14 rounded-full border-2 border-omen-red/50 bg-black/60 flex items-center justify-center">
+                        <i data-lucide="fan" id="icon-fan-gpu" class="w-7 h-7 text-omen-red fan-spinning" style="animation-duration: 0.6s;"></i>
+                      </div>
+                      <span class="text-[9px] font-mono text-gray-500 mt-1">GPU FAN</span>
+                      <span id="val-fan-gpu" class="font-mono text-xs font-bold text-white">3150 RPM</span>
+                    </div>
+                  </div>
+
+                  <!-- Mode Pills -->
+                  <div class="flex flex-col gap-1 font-mono text-[10px]">
+                    <button onclick="setFanPreset('silent')" id="preset-silent" class="px-2.5 py-0.5 rounded bg-white/5 border border-white/10 text-gray-400">SILENT</button>
+                    <button onclick="setFanPreset('balanced')" id="preset-balanced" class="px-2.5 py-0.5 rounded bg-omen-red/20 border border-omen-red text-white font-bold shadow-[0_0_8px_#FF1E27]">BALANCED</button>
+                    <button onclick="setFanPreset('performance')" id="preset-performance" class="px-2.5 py-0.5 rounded bg-white/5 border border-white/10 text-gray-400">PERFORMANCE</button>
+                    <button onclick="setFanPreset('turbo')" id="preset-turbo" class="px-2.5 py-0.5 rounded bg-white/5 border border-white/10 text-gray-400">TURBO</button>
+                    <button onclick="setFanPreset('custom')" id="preset-custom" class="px-2.5 py-0.5 rounded bg-purple-500/20 border border-purple-500 text-purple-300">CUSTOM</button>
+                  </div>
+                </div>
+
+                <!-- Fan Curve Custom Graph -->
+                <div class="mt-2">
+                  <div class="flex justify-between items-center text-[9px] font-mono text-gray-400 mb-1">
+                    <span>FAN CURVE (CUSTOM)</span>
+                    <span class="text-purple-400">TEMP °C vs RPM</span>
+                  </div>
+                  <div class="relative h-24 bg-black/60 rounded-lg border border-white/10 p-1">
+                    <canvas id="canvas-fan-curve" class="w-full h-full cursor-crosshair"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- RGB Keyboard Studio (6 Cols) -->
+            <div class="col-span-12 md:col-span-6 card-panel p-3 flex flex-col justify-between">
+              <div>
+                <h3 class="font-display font-bold text-white text-xs tracking-wider flex items-center gap-2 mb-2">
+                  <i data-lucide="palette" class="w-4 h-4 text-omen-violet"></i> RGB KEYBOARD STUDIO
+                </h3>
+
+                <!-- Top Down Keyboard Lighting Render -->
+                <div class="bg-black/60 border border-white/10 rounded-lg p-2 mb-2">
+                  <div class="grid grid-cols-12 gap-0.5 text-center">
+                    <div class="col-span-1 kbd-key py-0.5 lit-cyan">ESC</div>
+                    <div class="col-span-3 kbd-key py-0.5 lit-cyan">F1-F4</div>
+                    <div class="col-span-4 kbd-key py-0.5 lit-violet">F5-F8</div>
+                    <div class="col-span-4 kbd-key py-0.5 lit-red">F9-F12</div>
+
+                    <div class="col-span-1 kbd-key py-1.5">~</div>
+                    <div class="col-span-1 kbd-key py-1.5">1</div>
+                    <div class="col-span-1 kbd-key py-1.5 lit-red">W</div>
+                    <div class="col-span-1 kbd-key py-1.5">3</div>
+                    <div class="col-span-1 kbd-key py-1.5">4</div>
+                    <div class="col-span-1 kbd-key py-1.5">5</div>
+                    <div class="col-span-1 kbd-key py-1.5">6</div>
+                    <div class="col-span-1 kbd-key py-1.5">7</div>
+                    <div class="col-span-1 kbd-key py-1.5">8</div>
+                    <div class="col-span-1 kbd-key py-1.5">9</div>
+                    <div class="col-span-1 kbd-key py-1.5">0</div>
+                    <div class="col-span-1 kbd-key py-1.5">BS</div>
+
+                    <div class="col-span-1 kbd-key py-1.5">TAB</div>
+                    <div class="col-span-1 kbd-key py-1.5 lit-red">A</div>
+                    <div class="col-span-1 kbd-key py-1.5 lit-red">S</div>
+                    <div class="col-span-1 kbd-key py-1.5 lit-red">D</div>
+                    <div class="col-span-1 kbd-key py-1.5">R</div>
+                    <div class="col-span-1 kbd-key py-1.5">T</div>
+                    <div class="col-span-1 kbd-key py-1.5">Y</div>
+                    <div class="col-span-1 kbd-key py-1.5">U</div>
+                    <div class="col-span-1 kbd-key py-1.5">I</div>
+                    <div class="col-span-1 kbd-key py-1.5">O</div>
+                    <div class="col-span-1 kbd-key py-1.5">P</div>
+                    <div class="col-span-1 kbd-key py-1.5">ENT</div>
+
+                    <div class="col-span-12 kbd-key py-1 mt-0.5 lit-cyan">SPACEBAR UNDERGLOW</div>
+                  </div>
+                </div>
+
+                <!-- Effect Pills & Palette -->
+                <div class="flex items-center justify-between gap-2 text-[10px] font-mono">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-gray-400">EFFECT:</span>
+                    <button onclick="setRgbEffect('static')" id="fx-static" class="px-2 py-0.5 rounded bg-omen-red/20 border border-omen-red text-white font-bold">STATIC</button>
+                    <button onclick="setRgbEffect('wave')" id="fx-wave" class="px-2 py-0.5 rounded bg-white/5 text-gray-400">WAVE</button>
+                    <button onclick="setRgbEffect('breath')" id="fx-breath" class="px-2 py-0.5 rounded bg-white/5 text-gray-400">BREATH</button>
+                    <button onclick="setRgbEffect('reactive')" id="fx-reactive" class="px-2 py-0.5 rounded bg-white/5 text-gray-400">REACTIVE</button>
+                  </div>
+
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-gray-400">COLOR:</span>
+                    <input type="color" id="rgb-wheel" value="#00F0FF" onchange="setRgbColor(this.value)" class="w-5 h-5 rounded-full cursor-pointer bg-transparent border-0" />
+                  </div>
+                </div>
+
+                <!-- Brightness Slider -->
+                <div class="mt-2 flex items-center gap-2 text-[10px] font-mono">
+                  <i data-lucide="sun" class="w-3.5 h-3.5 text-gray-400"></i>
+                  <span class="text-gray-400">BRIGHTNESS:</span>
+                  <input type="range" min="0" max="100" value="75" oninput="updateBrightness(this.value)" class="flex-1">
+                  <span id="txt-bright" class="text-white font-bold w-8 text-right">75%</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- MODULE 4: POWER PROFILE (BOTTOM PANEL) -->
+          <div class="card-panel p-3.5">
+            <h2 class="font-display font-bold text-white text-xs tracking-wider flex items-center gap-2 mb-3">
+              <i data-lucide="sliders" class="w-4 h-4 text-amber-400"></i> POWER PROFILE
+            </h2>
+
+            <div class="grid grid-cols-12 gap-3 items-center text-xs font-mono">
+              
+              <!-- Power Mode Dropdown -->
+              <div class="col-span-3">
+                <span class="text-gray-400 block text-[10px] mb-1">POWER MODE</span>
+                <select class="w-full bg-black/60 border border-white/10 rounded px-2 py-1.5 text-white font-bold">
+                  <option>BEST PERFORMANCE</option>
+                  <option>BALANCED</option>
+                  <option>BATTERY SAVER</option>
+                </select>
+              </div>
+
+              <!-- TGP Slider -->
+              <div class="col-span-4">
+                <div class="flex justify-between text-[10px] mb-1">
+                  <span class="text-gray-400">TGP / TDP LIMIT</span>
+                  <span id="txt-tgp" class="text-omen-red font-bold">140W</span>
+                </div>
+                <input type="range" id="slider-tgp" min="35" max="175" value="140" oninput="updateTgp(this.value)" class="w-full">
+              </div>
+
+              <!-- Overclock Toggle -->
+              <div class="col-span-2 flex items-center justify-between bg-black/40 p-2 rounded border border-white/10">
+                <span class="text-gray-300 font-bold">OVERCLOCK</span>
+                <div onclick="toggleOverclock()" id="sw-overclock" class="switch-track active-red">
+                  <div class="switch-thumb"></div>
+                </div>
+              </div>
+
+              <!-- Undervolt Toggle -->
+              <div class="col-span-3 flex items-center justify-between bg-black/40 p-2 rounded border border-white/10">
+                <span class="text-gray-300 font-bold">UNDERVOLT</span>
+                <div onclick="toggleUndervolt()" id="sw-undervolt" class="switch-track active-violet">
+                  <div class="switch-thumb"></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT SIDEBAR: SYSTEM INFO (3 COLS) -->
+        <aside class="col-span-12 lg:col-span-3 flex flex-col gap-3">
+          
+          <div class="card-panel p-3.5 flex-1 flex flex-col justify-between">
+            <div>
+              <h3 class="font-display font-bold text-white text-xs tracking-wider flex items-center gap-2 mb-3">
+                <i data-lucide="info" class="w-4 h-4 text-omen-cyan"></i> SYSTEM INFO
+              </h3>
+
+              <div class="space-y-2 font-mono text-[11px]">
+                <div class="flex justify-between border-b border-white/5 pb-1">
+                  <span class="text-gray-400">MODEL NAME</span>
+                  <span class="text-white font-bold">OMEN 16-wf1xxx</span>
+                </div>
+                <div class="flex justify-between border-b border-white/5 pb-1">
+                  <span class="text-gray-400">SERIAL NUMBER</span>
+                  <span class="text-gray-300">5CD2345678</span>
+                </div>
+                <div class="flex justify-between border-b border-white/5 pb-1">
+                  <span class="text-gray-400">BIOS VERSION</span>
+                  <span class="text-omen-cyan font-bold">F.39</span>
+                </div>
+                <div class="flex justify-between border-b border-white/5 pb-1">
+                  <span class="text-gray-400">EC VERSION</span>
+                  <span class="text-gray-300">1.26</span>
+                </div>
+                <div class="flex justify-between border-b border-white/5 pb-1">
+                  <span class="text-gray-400">CPU</span>
+                  <span class="text-white font-bold truncate max-w-[120px]" title="Intel Core i7-13700HX">i7-13700HX</span>
+                </div>
+                <div class="flex justify-between border-b border-white/5 pb-1">
+                  <span class="text-gray-400">GPU</span>
+                  <span class="text-amber-400 font-bold truncate max-w-[120px]" title="NVIDIA RTX 4060 8GB">RTX 4060 8GB</span>
+                </div>
+                <div class="flex justify-between border-b border-white/5 pb-1">
+                  <span class="text-gray-400">RAM</span>
+                  <span class="text-white">16GB DDR5 4800MHz</span>
+                </div>
+                <div class="flex justify-between border-b border-white/5 pb-1">
+                  <span class="text-gray-400">DRIVER VERSION</span>
+                  <span class="text-omen-cyan">552.22</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-400">UPTIME</span>
+                  <span id="val-uptime" class="text-omen-green font-bold">2d 14h 27m 36s</span>
+                </div>
+              </div>
+
+              <!-- Storage Temps List -->
+              <div class="mt-4 pt-3 border-t border-white/10 font-mono text-[11px]">
+                <span class="text-gray-400 block mb-2 font-bold">STORAGE TEMPERATURES</span>
+                
+                <div class="space-y-2">
+                  <div>
+                    <div class="flex justify-between mb-0.5">
+                      <span class="text-gray-300">SSD 1 (1TB)</span>
+                      <span class="text-omen-green font-bold">49°C</span>
+                    </div>
+                    <div class="w-full h-1.5 bg-black/60 rounded overflow-hidden">
+                      <div class="h-full bg-omen-green" style="width: 49%;"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between mb-0.5">
+                      <span class="text-gray-300">SSD 2 (512GB)</span>
+                      <span class="text-omen-green font-bold">44°C</span>
+                    </div>
+                    <div class="w-full h-1.5 bg-black/60 rounded overflow-hidden">
+                      <div class="h-full bg-omen-green" style="width: 44%;"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Battery Health Card -->
+            <div class="mt-4 pt-3 border-t border-white/10 font-mono text-[11px]">
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-gray-400">BATTERY HEALTH:</span>
+                <span class="text-omen-green font-bold">92%</span>
+              </div>
+              <div class="w-full h-1.5 bg-black/60 rounded overflow-hidden mb-2">
+                <div class="h-full bg-omen-green" style="width: 92%;"></div>
+              </div>
+              <div class="flex justify-between text-[10px] text-gray-400">
+                <span>CHARGE LIMIT:</span>
+                <span class="text-white font-bold">80%</span>
+              </div>
+            </div>
+
+          </div>
+
+        </aside>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- 3. BOTTOM FLOATING DOCK BAR -->
+  <footer class="relative z-10 card-panel p-2 flex items-center justify-center max-w-[1920px] mx-auto w-full">
+    <div class="flex items-center gap-4 sm:gap-8 font-mono text-xs">
+      <button onclick="runBenchmarkModal()" class="flex items-center gap-2 hover:text-white transition-colors">
+        <i data-lucide="bar-chart-2" class="w-4 h-4 text-omen-red"></i>
+        <span>BENCHMARK</span>
+      </button>
+
+      <button onclick="syncGameLibrary()" class="flex items-center gap-2 hover:text-white transition-colors">
+        <i data-lucide="gamepad-2" class="w-4 h-4 text-omen-cyan"></i>
+        <span>GAME LIBRARY SYNC</span>
+      </button>
+
+      <button onclick="toggleMacroRecorder()" class="flex items-center gap-2 text-omen-violet font-bold">
+        <span class="w-2.5 h-2.5 rounded-full bg-omen-violet animate-ping"></span>
+        <span>MACRO RECORDER</span>
+      </button>
+
+      <button onclick="exportSensorLogs()" class="flex items-center gap-2 hover:text-white transition-colors">
+        <i data-lucide="download" class="w-4 h-4 text-omen-green"></i>
+        <span>EXPORT LOG</span>
+      </button>
+
+      <button onclick="openSettingsModal()" class="flex items-center gap-2 hover:text-white transition-colors">
+        <i data-lucide="settings" class="w-4 h-4 text-gray-400"></i>
+        <span>SETTINGS</span>
+      </button>
+    </div>
+  </footer>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    lucide.createIcons();
+
+    // Clock
+    setInterval(() => {
+      const d = new Date();
+      document.getElementById('top-clock').innerText = d.toLocaleTimeString();
+    }, 1000);
+
+    // State
+    const state = {
+      cpu: 72, gpu: 85, vrm: 68, ram: 54, ssd: 49,
+      cpuClock: 3.42, gpuClock: 2310, cpuUtil: 56, gpuUtil: 82, vram: 6.1,
+      overclock: true, undervolt: true
+    };
+
+    // Live update loop
+    setInterval(() => {
+      state.cpu = Math.min(95, Math.max(40, Math.round(state.cpu + (Math.random() * 4 - 2))));
+      state.gpu = Math.min(98, Math.max(45, Math.round(state.gpu + (Math.random() * 4 - 2))));
+      state.cpuUtil = Math.min(100, Math.max(10, Math.round(state.cpuUtil + (Math.random() * 10 - 5))));
+      state.gpuUtil = Math.min(100, Math.max(10, Math.round(state.gpuUtil + (Math.random() * 10 - 5))));
+
+      document.getElementById('val-cpu-temp').innerText = state.cpu + '°C';
+      document.getElementById('val-gpu-temp').innerText = state.gpu + '°C';
+      document.getElementById('val-cpu-util').innerText = state.cpuUtil + ' %';
+      document.getElementById('val-gpu-util').innerText = state.gpuUtil + ' %';
+
+      document.getElementById('gauge-cpu').style.strokeDashoffset = 163 - (163 * (state.cpu / 100));
+      document.getElementById('gauge-gpu').style.strokeDashoffset = 163 - (163 * (state.gpu / 100));
+
+      drawThermalStrip();
+      drawMiniCharts();
+    }, 1000);
+
+    // Canvas charts
+    const history = { cpu: [], gpu: [], vrm: [], ram: [], ssd: [] };
+    for (let i = 0; i < 40; i++) {
+      history.cpu.push(65 + Math.random() * 10);
+      history.gpu.push(75 + Math.random() * 10);
+      history.vrm.push(60 + Math.random() * 8);
+      history.ram.push(50 + Math.random() * 5);
+      history.ssd.push(45 + Math.random() * 4);
+    }
+
+    function drawThermalStrip() {
+      const c = document.getElementById('canvas-thermal-strip');
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      const w = c.width = c.parentElement.clientWidth;
+      const h = c.height = c.parentElement.clientHeight;
+
+      history.cpu.push(state.cpu); if (history.cpu.length > 40) history.cpu.shift();
+      history.gpu.push(state.gpu); if (history.gpu.length > 40) history.gpu.shift();
+      history.vrm.push(state.vrm); if (history.vrm.length > 40) history.vrm.shift();
+      history.ram.push(state.ram); if (history.ram.length > 40) history.ram.shift();
+      history.ssd.push(state.ssd); if (history.ssd.length > 40) history.ssd.shift();
+
+      ctx.clearRect(0, 0, w, h);
+      const drawL = (arr, col) => {
+        ctx.beginPath(); ctx.strokeStyle = col; ctx.lineWidth = 1.5;
+        const step = w / (arr.length - 1);
+        arr.forEach((v, i) => {
+          const x = i * step;
+          const y = h - (v / 100) * h;
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+      };
+      drawL(history.cpu, '#FF1E27');
+      drawL(history.gpu, '#FF9900');
+      drawL(history.vrm, '#9D00FF');
+      drawL(history.ram, '#00F0FF');
+      drawL(history.ssd, '#3B82F6');
+    }
+
+    function drawMiniCharts() {
+      const ids = ['chart-cpu-clock', 'chart-gpu-clock', 'chart-cpu-util', 'chart-gpu-util', 'chart-vram-usage'];
+      const cols = ['#3B82F6', '#FF1E27', '#00F0FF', '#FF9900', '#9D00FF'];
+
+      ids.forEach((id, idx) => {
+        const c = document.getElementById(id);
+        if (!c) return;
+        const ctx = c.getContext('2d');
+        const w = c.width = c.parentElement.clientWidth;
+        const h = c.height = c.parentElement.clientHeight;
+
+        ctx.clearRect(0, 0, w, h);
+        ctx.beginPath();
+        ctx.moveTo(0, h);
+        for (let x = 0; x <= w; x += 8) {
+          const y = h/2 + Math.sin((x + Date.now()/80) / 12) * (h/3);
+          ctx.lineTo(x, y);
+        }
+        ctx.lineTo(w, h);
+        ctx.closePath();
+
+        const grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, cols[idx] + '66');
+        grad.addColorStop(1, cols[idx] + '00');
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.strokeStyle = cols[idx];
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+    }
+
+    // Fan Curve
+    function drawFanCurve() {
+      const c = document.getElementById('canvas-fan-curve');
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      const w = c.width = c.parentElement.clientWidth;
+      const h = c.height = c.parentElement.clientHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      const pts = [{x:0,y:0.9},{x:0.35,y:0.8},{x:0.5,y:0.65},{x:0.65,y:0.45},{x:0.8,y:0.3},{x:1,y:0.1}];
+      ctx.beginPath(); ctx.strokeStyle = '#9D00FF'; ctx.lineWidth = 2;
+      pts.forEach((p, i) => {
+        const x = p.x * w, y = p.y * h;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      pts.forEach(p => {
+        ctx.beginPath(); ctx.arc(p.x * w, p.y * h, 4, 0, Math.PI*2);
+        ctx.fillStyle = '#00F0FF'; ctx.shadowColor = '#00F0FF'; ctx.shadowBlur = 6; ctx.fill(); ctx.shadowBlur = 0;
+      });
+    }
+    setTimeout(drawFanCurve, 300);
+
+    // Toggles
+    function toggleOverclock() {
+      state.overclock = !state.overclock;
+      document.getElementById('sw-overclock').className = state.overclock ? "switch-track active-red" : "switch-track";
+    }
+    function toggleUndervolt() {
+      state.undervolt = !state.undervolt;
+      document.getElementById('sw-undervolt').className = state.undervolt ? "switch-track active-violet" : "switch-track";
+    }
+    function updateBrightness(v) { document.getElementById('txt-bright').innerText = v + '%'; }
+    function updateTgp(v) { document.getElementById('txt-tgp').innerText = v + 'W'; }
+    function setGpuMode(m) {
+      document.getElementById('btn-hybrid').className = m === 'hybrid' ? "px-2.5 py-0.5 rounded text-[10px] font-bold bg-omen-red/20 border border-omen-red text-white" : "px-2.5 py-0.5 rounded text-[10px] font-bold text-gray-400 hover:text-white";
+      document.getElementById('btn-discrete').className = m === 'discrete' ? "px-2.5 py-0.5 rounded text-[10px] font-bold bg-omen-red/20 border border-omen-red text-white" : "px-2.5 py-0.5 rounded text-[10px] font-bold text-gray-400 hover:text-white";
+    }
+    function dismissAlert() { document.querySelector('.card-panel.bg-omen-red\\/10').style.display = 'none'; }
+  </script>
+</body>
+</html>

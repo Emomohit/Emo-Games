@@ -15,3 +15,5 @@ export default function(container, api){
   loopId = setInterval(()=>{ if(auto>0){ count+=auto; api.setScore('Cookies: '+count); } }, 1000);
   reset(); return { restart: reset, destroy(){ clearInterval(loopId); } };
 
+
+}

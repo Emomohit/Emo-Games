@@ -24,3 +24,5 @@ export default function(container, api){
   div.appendChild(wordEl); div.appendChild(btnBox); container.appendChild(div); reset();
   return { restart: reset, destroy(){ clearTimeout(tId); } };
 
+
+}

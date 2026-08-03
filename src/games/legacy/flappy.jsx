@@ -40,3 +40,5 @@ export default function(container, api){
   reset(); api.setScore('Score 0'); loopId = setInterval(tick, 20);
   return { restart: reset, destroy(){ clearInterval(loopId); document.removeEventListener('keydown', keyH); }};
 
+
+}

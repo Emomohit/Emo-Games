@@ -24,3 +24,5 @@ export default function(container, api){
   div.appendChild(h1); div.appendChild(input); container.appendChild(div); reset();
   return { restart: reset, destroy(){} };
 
+
+}

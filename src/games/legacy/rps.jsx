@@ -20,4 +20,4 @@ export default function(container, api){
   
   div.appendChild(h2); div.appendChild(box); container.appendChild(div);
   return { restart(){ score=0; h2.textContent="Choose your weapon"; api.setScore('Streak 0'); }, destroy(){} };
-
+}

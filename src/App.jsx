@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CATEGORIES, GAMES, getBgClass } from './utils/constants.js';
 import LegacyGameAdapter from './components/LegacyGameAdapter.jsx';
 import PingPong from './games/PingPong.jsx';
+import SpaceInvaders from './games/SpaceInvaders.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import Topbar from './components/Topbar.jsx';
 import GameGrid from './components/GameGrid.jsx';
@@ -80,7 +81,9 @@ function App() {
                 
                 <div className="game-container">
                   {/* Native React Game OR Legacy Vanilla JS Game */}
-                  {activeGameDef?.isReactNative ? (
+                  {activeGameDef?.isSpaceInvaders ? (
+                    <SpaceInvaders setScore={setScoreText} />
+                  ) : activeGameDef?.isReactNative ? (
                     <PingPong setScore={setScoreText} />
                   ) : (
                     <LegacyGameAdapter gameId={activeGameId} setScore={setScoreText} />

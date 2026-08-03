@@ -21,3 +21,5 @@ export default function(container, api){
   div.appendChild(qEl); div.appendChild(ansEl); container.appendChild(div); reset();
   return { restart: reset, destroy(){ clearTimeout(tId); } };
 
+
+}

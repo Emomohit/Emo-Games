@@ -41,3 +41,5 @@ export default function(container, api){
   container.appendChild(canvas); reset(); loopId = setInterval(tick, 16);
   return { restart: reset, destroy(){ clearInterval(loopId); }};
 
+
+}

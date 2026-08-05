@@ -10,6 +10,8 @@ import Game2048 from './games/Game2048.jsx';
 import SubwayRunner from './games/SubwayRunner.jsx';
 import StackGame from './games/StackGame.jsx';
 import BugPop from './games/BugPop.jsx';
+import Tetris from './games/Tetris.jsx';
+import FlappyBird from './games/FlappyBird.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import Topbar from './components/Topbar.jsx';
 import GameGrid from './components/GameGrid.jsx';
@@ -48,6 +50,10 @@ function App() {
 
   const renderGameContent = () => {
     switch (activeGameId) {
+      case 'tetris':
+        return <Tetris setScore={setScoreText} />;
+      case 'flappybird':
+        return <FlappyBird setScore={setScoreText} />;
       case 'spaceinvaders':
         return <SpaceInvaders setScore={setScoreText} />;
       case 'pingpong':

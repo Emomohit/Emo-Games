@@ -8,7 +8,8 @@ export const CATEGORIES = [
 ];
 
 export const GAMES = [
-  { id: 'tetris', title: 'Tetris (NEW)', emoji: '🧱', category: 'arcade', span: true },
+  { id: 'pacman', title: 'Pac-Man (NEW)', emoji: '🟡', category: 'arcade', span: true },
+  { id: 'tetris', title: 'Tetris', emoji: '🧱', category: 'arcade', span: true },
   { id: 'flappybird', title: 'Flappy Bird (NEW)', emoji: '🐤', category: 'arcade', span: false },
   { id: 'spaceinvaders', title: 'Space Invaders', emoji: '👾', category: 'arcade', span: true, isSpaceInvaders: true },
   { id: 'pingpong', title: 'Ping Pong', emoji: '🏓', category: 'arcade', span: true, isReactNative: true }, // Our newly added feature

@@ -14,6 +14,7 @@ import Tetris from './games/Tetris.jsx';
 import FlappyBird from './games/FlappyBird.jsx';
 import PacMan from './games/PacMan.jsx';
 import AirHockey from './games/AirHockey.jsx';
+import Asteroids from './games/Asteroids.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import Topbar from './components/Topbar.jsx';
 import GameGrid from './components/GameGrid.jsx';
@@ -52,6 +53,8 @@ function App() {
 
   const renderGameContent = () => {
     switch (activeGameId) {
+      case 'asteroids':
+        return <Asteroids setScore={setScoreText} />;
       case 'airhockey':
         return <AirHockey setScore={setScoreText} />;
       case 'pacman':

@@ -16,6 +16,7 @@ import PacMan from './games/PacMan.jsx';
 import AirHockey from './games/AirHockey.jsx';
 import Asteroids from './games/Asteroids.jsx';
 import FruitNinja from './games/FruitNinja.jsx';
+import Breakout from './games/Breakout.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import Topbar from './components/Topbar.jsx';
 import GameGrid from './components/GameGrid.jsx';
@@ -54,6 +55,8 @@ function App() {
 
   const renderGameContent = () => {
     switch (activeGameId) {
+      case 'dxball':
+        return <Breakout setScore={setScoreText} />;
       case 'fruitninja':
         return <FruitNinja setScore={setScoreText} />;
       case 'asteroids':

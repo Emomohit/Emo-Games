@@ -8,6 +8,7 @@ export const CATEGORIES = [
 ];
 
 export const GAMES = [
+  { id: 'dxball', title: 'DX-Ball Arcade (NEW)', emoji: '🧱', category: 'arcade', span: true },
   { id: 'fruitninja', title: 'Fruit Ninja (NEW)', emoji: '🍉', category: 'arcade', span: true },
   { id: 'asteroids', title: 'Asteroids 3D', emoji: '☄️', category: 'arcade', span: true },
   { id: 'airhockey', title: 'Air Hockey', emoji: '🏒', category: 'arcade', span: true },

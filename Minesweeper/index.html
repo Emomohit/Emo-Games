@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Minesweeper — Emo Games</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --neon-purple: #b44aff;
+  --neon-cyan: #00f0ff;
+  --neon-red: #ff3355;
+  --neon-green: #39ff14;
+  --neon-yellow: #ffe600;
+  --bg-dark: #0a0b10;
+  --glow-purple: 0 0 12px rgba(180,74,255,.6), 0 0 40px rgba(180,74,255,.2);
+  --glow-cyan: 0 0 12px rgba(0,240,255,.6), 0 0 40px rgba(0,240,255,.2);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: auto; background: var(--bg-dark); }
+body {
+  font-family: 'Inter', sans-serif; color: #fff;
+  display: flex; flex-direction: column; align-items: center;
+  user-select: none; -webkit-user-select: none;
+  min-height: 100vh;
+}
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: -1;
+  background-image:
+    linear-gradient(rgba(180,74,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(180,74,255,.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+#hud {
+  width: 100%; max-width: 600px;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 10px 10px;
+  margin-top: 10px;
+}
+.hud-item { text-align: center; }
+.hud-label { font: 600 9px/1 'Orbitron', monospace; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.35); margin-bottom: 4px; }
+.hud-val { font: 900 20px/1 'Orbitron', monospace; color: var(--neon-purple); text-shadow: var(--glow-purple); }
+.hud-val.cyan { color: var(--neon-cyan); text-shadow: var(--glow-cyan); }
+#title { font: 900 16px/1 'Orbitron', monospace; letter-spacing: .12em; color: var(--neon-purple); text-shadow: var(--glow-purple); text-transform: uppercase; }
+
+#difficulty {
+  display: flex; gap: 8px; margin: 12px 0;
+}
+.diff-btn {
+  padding: 8px 18px; font: 700 11px/1 'Orbitron', monospace; letter-spacing: .1em;
+  text-transform: uppercase; color: rgba(255,255,255,.5);
+  background: rgba(180,74,255,.08); border: 1px solid rgba(180,74,255,.25);
+  border-radius: 6px; cursor: pointer; transition: all .15s;
+}
+.diff-btn:hover, .diff-btn.active { color: #fff; background: rgba(180,74,255,.2); border-color: var(--neon-purple); box-shadow: var(--glow-purple); }
+
+#board {
+  display: inline-grid; gap: 2px;
+  padding: 8px; border-radius: 10px;
+  border: 2px solid rgba(180,74,255,.2);
+  background: rgba(10,11,16,.7);
+  box-shadow: var(--glow-purple), inset 0 0 40px rgba(180,74,255,.02);
+  margin-bottom: 20px;
+}
+.cell {
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  font: 700 14px/1 'Orbitron', monospace;
+  background: rgba(180,74,255,.08);
+  border: 1px solid rgba(180,74,255,.15);
+  border-radius: 4px; cursor: pointer;
+  transition: background .1s, transform .08s;
+}
+.cell:hover:not(.revealed):not(.flagged) { background: rgba(180,74,255,.2); transform: scale(1.05); }
+.cell.revealed { background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.05); cursor: default; }
+.cell.flagged { background: rgba(255,51,85,.1); border-color: rgba(255,51,85,.3); }
+.cell.mine-hit { background: rgba(255,51,85,.3); border-color: var(--neon-red); }
+.cell .flag { color: var(--neon-red); }
+.cell .mine { font-size: 16px; }
+.n1 { color: #00f0ff; } .n2 { color: #39ff14; } .n3 { color: #ff6b00; }
+.n4 { color: #b44aff; } .n5 { color: #ff3355; } .n6 { color: #00f0ff; }
+.n7 { color: #fff; } .n8 { color: #888; }
+
+.overlay {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: rgba(6,6,14,.88); backdrop-filter: blur(8px);
+  text-align: center; padding: 24px; transition: opacity .3s;
+}
+.overlay.hidden { opacity: 0; pointer-events: none; }
+.overlay h1 { font: 900 clamp(28px,5vw,44px)/1.1 'Orbitron', monospace; margin-bottom: 10px; }
+.overlay h1 .neon-p { color: var(--neon-purple); text-shadow: var(--glow-purple); }
+.overlay h1 .neon-c { color: var(--neon-cyan); text-shadow: var(--glow-cyan); }
+.overlay p { font: 400 13px/1.6 'Inter', sans-serif; color: rgba(255,255,255,.55); max-width: 300px; margin: 6px auto 0; }
+.overlay .result { font: 700 16px/1 'Orbitron', monospace; color: var(--neon-cyan); text-shadow: var(--glow-cyan); margin-top: 12px; }
+.start-btn {
+  margin-top: 20px; padding: 14px 36px;
+  font: 700 13px/1 'Orbitron', monospace; letter-spacing: .12em; text-transform: uppercase;
+  color: #000; background: var(--neon-purple); border: none; border-radius: 8px;
+  cursor: pointer; box-shadow: var(--glow-purple);
+  transition: transform .12s, box-shadow .2s;
+}
+.start-btn:hover { transform: scale(1.05); }
+.start-btn:active { transform: scale(.97); }
+
+#footer { padding: 15px 0 20px; text-align: center; font: 500 10px/1 'Inter', sans-serif; letter-spacing: .08em; color: rgba(255,255,255,.2); }
+#footer b { color: var(--neon-purple); font-weight: 700; }
+
+@media (max-width: 420px) {
+  .cell { width: 28px; height: 28px; font-size: 11px; }
+}
+</style>
+</head>
+<body>
+
+<div id="hud">
+  <div class="hud-item"><div class="hud-label">Mines</div><div class="hud-val" id="mine-count">10</div></div>
+  <div id="title">MINESWEEPER</div>
+  <div class="hud-item"><div class="hud-label">Time</div><div class="hud-val cyan" id="timer">0</div></div>
+</div>
+
+<div id="difficulty">
+  <button class="diff-btn active" data-d="easy">Easy</button>
+  <button class="diff-btn" data-d="medium">Medium</button>
+  <button class="diff-btn" data-d="hard">Hard</button>
+</div>
+
+<div id="board"></div>
+
+<div class="overlay hidden" id="win-screen">
+  <h1><span class="neon-c">YOU</span> <span class="neon-p">WIN!</span></h1>
+  <div class="result" id="win-time">Time: 0s</div>
+  <p>All mines cleared!</p>
+  <button class="start-btn" id="win-btn">PLAY AGAIN</button>
+</div>
+
+<div class="overlay hidden" id="lose-screen">
+  <h1><span class="neon-p">BOOM!</span></h1>
+  <p>You hit a mine. Better luck next time!</p>
+  <button class="start-btn" id="lose-btn">TRY AGAIN</button>
+</div>
+
+<div id="footer">Built with 💣 by <b>Emo Games</b></div>
+
+<script>
+(() => {
+'use strict';
+
+const CONFIGS = {
+  easy:   { rows: 9,  cols: 9,  mines: 10 },
+  medium: { rows: 12, cols: 12, mines: 25 },
+  hard:   { rows: 14, cols: 14, mines: 45 },
+};
+
+let difficulty = 'easy';
+let rows, cols, totalMines;
+let grid, revealed, flagged, mineMap;
+let gameOver, gameWon, firstClick, timerInterval, seconds;
+
+const $board = document.getElementById('board');
+const $mineCount = document.getElementById('mine-count');
+const $timer = document.getElementById('timer');
+const $winScreen = document.getElementById('win-screen');
+const $loseScreen = document.getElementById('lose-screen');
+const $winTime = document.getElementById('win-time');
+
+// Difficulty buttons
+document.querySelectorAll('.diff-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    difficulty = btn.dataset.d;
+    initGame();
+  });
+});
+
+document.getElementById('win-btn').addEventListener('click', () => { $winScreen.classList.add('hidden'); initGame(); });
+document.getElementById('lose-btn').addEventListener('click', () => { $loseScreen.classList.add('hidden'); initGame(); });
+
+function initGame() {
+  const cfg = CONFIGS[difficulty];
+  rows = cfg.rows; cols = cfg.cols; totalMines = cfg.mines;
+  grid = Array.from({ length: rows }, () => Array(cols).fill(0));
+  revealed = Array.from({ length: rows }, () => Array(cols).fill(false));
+  flagged = Array.from({ length: rows }, () => Array(cols).fill(false));
+  mineMap = Array.from({ length: rows }, () => Array(cols).fill(false));
+  gameOver = false; gameWon = false; firstClick = true;
+  seconds = 0;
+  clearInterval(timerInterval);
+  $timer.textContent = '0';
+  $mineCount.textContent = totalMines;
+  $winScreen.classList.add('hidden');
+  $loseScreen.classList.add('hidden');
+  renderBoard();
+}
+
+function placeMines(safeR, safeC) {
+  let placed = 0;
+  while (placed < totalMines) {
+    const r = Math.floor(Math.random() * rows);
+    const c = Math.floor(Math.random() * cols);
+    if (mineMap[r][c]) continue;
+    if (Math.abs(r - safeR) <= 1 && Math.abs(c - safeC) <= 1) continue;
+    mineMap[r][c] = true;
+    placed++;
+  }
+  // Calculate numbers
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (mineMap[r][c]) { grid[r][c] = -1; continue; }
+      let count = 0;
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          const nr = r + dr, nc = c + dc;
+          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && mineMap[nr][nc]) count++;
+        }
+      }
+      grid[r][c] = count;
+    }
+  }
+}
+
+function renderBoard() {
+  $board.style.gridTemplateColumns = `repeat(${cols}, auto)`;
+  $board.innerHTML = '';
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.r = r; cell.dataset.c = c;
+      cell.addEventListener('click', () => handleClick(r, c));
+      cell.addEventListener('contextmenu', e => { e.preventDefault(); handleFlag(r, c); });
+      // Long press for mobile flagging
+      let pressTimer;
+      cell.addEventListener('pointerdown', () => { pressTimer = setTimeout(() => handleFlag(r, c), 400); });
+      cell.addEventListener('pointerup', () => clearTimeout(pressTimer));
+      cell.addEventListener('pointerleave', () => clearTimeout(pressTimer));
+      $board.appendChild(cell);
+    }
+  }
+}
+
+function getCell(r, c) {
+  return $board.children[r * cols + c];
+}
+
+function handleClick(r, c) {
+  if (gameOver || flagged[r][c] || revealed[r][c]) return;
+  if (firstClick) {
+    firstClick = false;
+    placeMines(r, c);
+    timerInterval = setInterval(() => { seconds++; $timer.textContent = seconds; }, 1000);
+  }
+  if (mineMap[r][c]) {
+    gameOver = true;
+    clearInterval(timerInterval);
+    revealAll(r, c);
+    setTimeout(() => $loseScreen.classList.remove('hidden'), 600);
+    return;
+  }
+  reveal(r, c);
+  checkWin();
+}
+
+function handleFlag(r, c) {
+  if (gameOver || revealed[r][c]) return;
+  flagged[r][c] = !flagged[r][c];
+  const cell = getCell(r, c);
+  if (flagged[r][c]) {
+    cell.classList.add('flagged');
+    cell.innerHTML = '<span class="flag">🚩</span>';
+  } else {
+    cell.classList.remove('flagged');
+    cell.innerHTML = '';
+  }
+  const flagCount = flagged.flat().filter(Boolean).length;
+  $mineCount.textContent = Math.max(0, totalMines - flagCount);
+}
+
+function reveal(r, c) {
+  if (r < 0 || r >= rows || c < 0 || c >= cols) return;
+  if (revealed[r][c] || flagged[r][c]) return;
+  revealed[r][c] = true;
+  const cell = getCell(r, c);
+  cell.classList.add('revealed');
+  const val = grid[r][c];
+  if (val > 0) {
+    cell.textContent = val;
+    cell.classList.add(`n${val}`);
+  } else if (val === 0) {
+    // Flood fill
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        reveal(r + dr, c + dc);
+      }
+    }
+  }
+}
+
+function revealAll(hitR, hitC) {
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (mineMap[r][c]) {
+        const cell = getCell(r, c);
+        cell.classList.add('revealed');
+        cell.innerHTML = '<span class="mine">💣</span>';
+        if (r === hitR && c === hitC) cell.classList.add('mine-hit');
+      }
+    }
+  }
+}
+
+function checkWin() {
+  let unrev = 0;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (!revealed[r][c]) unrev++;
+    }
+  }
+  if (unrev === totalMines) {
+    gameOver = true; gameWon = true;
+    clearInterval(timerInterval);
+    $winTime.textContent = `Time: ${seconds}s`;
+    setTimeout(() => $winScreen.classList.remove('hidden'), 400);
+  }
+}
+
+initGame();
+})();
+</script>
+</body>
+</html>

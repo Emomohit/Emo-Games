@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Breakout — Emo Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root { --nc:#00f0ff; --np:#b44aff; --no:#ff6b00; --nr:#ff3355; --ng:#39ff14; --ny:#ffe600; --bg:#080a12; }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:'Inter',sans-serif;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;user-select:none}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background-image:linear-gradient(rgba(0,240,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,.025) 1px,transparent 1px);background-size:35px 35px}
+#hud{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:14px 24px;background:linear-gradient(180deg,rgba(8,10,18,.95),transparent)}
+.h-l{font:600 9px/1 'Orbitron',monospace;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:4px}
+.h-v{font:900 20px/1 'Orbitron',monospace;color:var(--nc);text-shadow:0 0 10px rgba(0,240,255,.5)}
+.h-v.p{color:var(--np);text-shadow:0 0 10px rgba(180,74,255,.5)}
+#ht{font:900 14px/1 'Orbitron',monospace;letter-spacing:.12em;color:var(--nc);text-shadow:0 0 12px rgba(0,240,255,.5);text-transform:uppercase}
+#arena{position:relative;border:2px solid rgba(0,240,255,.2);border-radius:8px;box-shadow:0 0 15px rgba(0,240,255,.12);background:rgba(8,10,18,.6)}
+canvas{display:block;border-radius:6px}
+.ov{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(4,5,10,.9);backdrop-filter:blur(6px);border-radius:6px;text-align:center;padding:24px;transition:opacity .3s}
+.ov.h{opacity:0;pointer-events:none}
+.ov h1{font:900 clamp(26px,5vw,44px)/1.1 'Orbitron',monospace;margin-bottom:10px}
+.ov .nc{color:var(--nc);text-shadow:0 0 15px rgba(0,240,255,.6)}
+.ov .np{color:var(--np);text-shadow:0 0 15px rgba(180,74,255,.6)}
+.ov p{font:400 13px/1.6 'Inter',sans-serif;color:rgba(255,255,255,.5);max-width:300px;margin:6px auto 0}
+.ov .sl{font:700 16px/1 'Orbitron',monospace;color:var(--nc);margin-top:14px}
+.btn{margin-top:20px;padding:14px 36px;font:700 13px/1 'Orbitron',monospace;letter-spacing:.12em;text-transform:uppercase;color:#000;background:var(--nc);border:none;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(0,240,255,.5);transition:transform .12s}
+.btn:hover{transform:scale(1.05)}.btn:active{transform:scale(.97)}
+#mc{display:none;position:fixed;bottom:15px;left:0;right:0;z-index:30;justify-content:center;gap:20px;pointer-events:none}
+.mb{width:64px;height:64px;background:rgba(0,240,255,.08);border:1.5px solid rgba(0,240,255,.25);border-radius:50%;color:rgba(0,240,255,.6);display:grid;place-items:center;font-size:22px;cursor:pointer;pointer-events:auto;-webkit-tap-highlight-color:transparent}
+.mb:active{background:rgba(0,240,255,.25);color:#fff}
+@media(max-width:600px),(pointer:coarse){#mc{display:flex}}
+#ft{position:fixed;bottom:5px;left:0;right:0;z-index:20;text-align:center;font:500 10px/1 'Inter',sans-serif;color:rgba(255,255,255,.2)}
+#ft b{color:var(--nc)}
+</style>
+</head>
+<body>
+<div id="hud">
+  <div><div class="h-l">Score</div><div class="h-v" id="sc">0</div></div>
+  <div id="ht">NEON BREAKOUT</div>
+  <div><div class="h-l">Lives</div><div class="h-v p" id="lv">3</div></div>
+</div>
+<div id="arena">
+  <canvas id="gc"></canvas>
+  <div class="ov" id="ss">
+    <h1><span class="nc">NEON</span> <span class="np">BREAKOUT</span></h1>
+    <p>Break all the neon bricks! Don't let the ball fall.</p>
+    <p style="color:rgba(255,255,255,.35);font-size:11px;margin-top:6px">← → or touch to move paddle</p>
+    <button class="btn" id="sb">PLAY</button>
+  </div>
+  <div class="ov h" id="os">
+    <h1><span class="np">GAME</span> <span class="nc">OVER</span></h1>
+    <div class="sl" id="fs">SCORE: 0</div>
+    <button class="btn" id="rb">RETRY</button>
+  </div>
+  <div class="ov h" id="ws">
+    <h1><span class="nc">YOU WIN!</span></h1>
+    <div class="sl" id="wsc">SCORE: 0</div>
+    <p>All bricks destroyed!</p>
+    <button class="btn" id="nb">NEXT LEVEL</button>
+  </div>
+</div>
+<div id="mc">
+  <button class="mb" id="ml">◀</button>
+  <button class="mb" id="mr">▶</button>
+</div>
+<div id="ft">Built with 🧱 by <b>Emo Games</b></div>
+<script>
+(()=>{
+'use strict';
+const W=500,H=550,cvs=document.getElementById('gc');
+cvs.width=W;cvs.height=H;
+const ctx=cvs.getContext('2d');
+const COLORS=['#ff3355','#ff6b00','#ffe600','#39ff14','#00f0ff','#b44aff','#ff007f'];
+const PW=80,PH=14,BR=7,ROWS=6,COLS=9,BW=48,BH=18,BPAD=4,BTOP=40;
+let paddle,ball,bricks,score,lives,level,alive,particles,stuck;
+const keys={};
+window.addEventListener('keydown',e=>{keys[e.key]=true});
+window.addEventListener('keyup',e=>{keys[e.key]=false});
+let mobL=false,mobR=false;
+const bm=(el,fn)=>{el.addEventListener('pointerdown',e=>{e.preventDefault();fn(true)});el.addEventListener('pointerup',e=>{e.preventDefault();fn(false)});el.addEventListener('pointerleave',()=>fn(false))};
+bm(document.getElementById('ml'),v=>mobL=v);
+bm(document.getElementById('mr'),v=>mobR=v);
+// Touch move on canvas
+let touchX=null;
+cvs.addEventListener('touchmove',e=>{e.preventDefault();touchX=e.touches[0].clientX},{passive:false});
+cvs.addEventListener('touchend',()=>touchX=null);
+
+function init(lvl){
+  level=lvl||1;
+  paddle={x:W/2-PW/2,y:H-40,w:PW,h:PH};
+  const spd=3+level*0.5;
+  ball={x:W/2,y:paddle.y-BR,r:BR,dx:spd*(Math.random()>.5?1:-1),dy:-spd};
+  stuck=true;
+  bricks=[];particles=[];
+  const totalW=COLS*(BW+BPAD)-BPAD;
+  const sx=(W-totalW)/2;
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      bricks.push({x:sx+c*(BW+BPAD),y:BTOP+r*(BH+BPAD),w:BW,h:BH,alive:true,color:COLORS[(r+level)%COLORS.length],hp:r<2&&level>2?2:1});
+    }
+  }
+}
+function spark(x,y,color,n=10){
+  for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=1+Math.random()*3;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:1,color,size:2+Math.random()*3})}
+}
+function update(){
+  if(!alive)return;
+  const spd=6;
+  if(keys['ArrowLeft']||keys['a']||keys['A']||mobL)paddle.x-=spd;
+  if(keys['ArrowRight']||keys['d']||keys['D']||mobR)paddle.x+=spd;
+  if(touchX!==null){
+    const rect=cvs.getBoundingClientRect();
+    const tx=(touchX-rect.left)/rect.width*W;
+    paddle.x+=(tx-paddle.x-paddle.w/2)*0.15;
+  }
+  paddle.x=Math.max(0,Math.min(W-paddle.w,paddle.x));
+  if(stuck){ball.x=paddle.x+paddle.w/2;ball.y=paddle.y-ball.r;
+    if(keys[' ']||keys['ArrowUp']){stuck=false}
+    return;
+  }
+  ball.x+=ball.dx;ball.y+=ball.dy;
+  // Walls
+  if(ball.x-ball.r<=0){ball.x=ball.r;ball.dx=Math.abs(ball.dx)}
+  if(ball.x+ball.r>=W){ball.x=W-ball.r;ball.dx=-Math.abs(ball.dx)}
+  if(ball.y-ball.r<=0){ball.y=ball.r;ball.dy=Math.abs(ball.dy)}
+  // Fall
+  if(ball.y+ball.r>=H){
+    lives--;document.getElementById('lv').textContent=lives;
+    spark(ball.x,ball.y,'#ff3355',20);
+    if(lives<=0){alive=false;document.getElementById('fs').textContent=`SCORE: ${score}`;setTimeout(()=>document.getElementById('os').classList.remove('h'),400);return}
+    stuck=true;
+  }
+  // Paddle
+  if(ball.dy>0&&ball.y+ball.r>=paddle.y&&ball.y-ball.r<=paddle.y+paddle.h&&ball.x>=paddle.x&&ball.x<=paddle.x+paddle.w){
+    ball.dy=-Math.abs(ball.dy);
+    const hit=(ball.x-(paddle.x+paddle.w/2))/(paddle.w/2);
+    ball.dx=hit*5;
+    spark(ball.x,paddle.y,'#00f0ff',8);
+  }
+  // Bricks
+  for(const b of bricks){
+    if(!b.alive)continue;
+    if(ball.x+ball.r>b.x&&ball.x-ball.r<b.x+b.w&&ball.y+ball.r>b.y&&ball.y-ball.r<b.y+b.h){
+      b.hp--;
+      if(b.hp<=0){b.alive=false;score+=10*level;document.getElementById('sc').textContent=score;spark(b.x+b.w/2,b.y+b.h/2,b.color,15)}
+      // Determine bounce direction
+      const ox=Math.min(ball.x+ball.r-b.x,b.x+b.w-(ball.x-ball.r));
+      const oy=Math.min(ball.y+ball.r-b.y,b.y+b.h-(ball.y-ball.r));
+      if(ox<oy)ball.dx*=-1;else ball.dy*=-1;
+      break;
+    }
+  }
+  // Win check
+  if(bricks.every(b=>!b.alive)){
+    alive=false;document.getElementById('wsc').textContent=`SCORE: ${score}`;
+    setTimeout(()=>document.getElementById('ws').classList.remove('h'),400);
+  }
+  // Particles
+  for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.life-=.03;p.size*=.96;if(p.life<=0)particles.splice(i,1)}
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // Bricks
+  bricks.forEach(b=>{if(!b.alive)return;ctx.fillStyle=b.color;ctx.shadowColor=b.color;ctx.shadowBlur=8;ctx.fillRect(b.x,b.y,b.w,b.h);if(b.hp>1){ctx.fillStyle='rgba(255,255,255,.2)';ctx.fillRect(b.x+2,b.y+2,b.w-4,b.h-4)}ctx.shadowBlur=0});
+  // Paddle
+  ctx.fillStyle='#00f0ff';ctx.shadowColor='#00f0ff';ctx.shadowBlur=12;
+  ctx.beginPath();ctx.roundRect(paddle.x,paddle.y,paddle.w,paddle.h,7);ctx.fill();ctx.shadowBlur=0;
+  // Ball
+  ctx.fillStyle='#fff';ctx.shadowColor='#fff';ctx.shadowBlur=10;
+  ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+  // Particles
+  particles.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fillStyle=p.color;ctx.globalAlpha=Math.max(0,p.life);ctx.shadowColor=p.color;ctx.shadowBlur=5;ctx.fill();ctx.globalAlpha=1;ctx.shadowBlur=0});
+}
+function loop(){update();draw();requestAnimationFrame(loop)}
+function start(lvl){
+  score=lvl>1?score:0;lives=lvl>1?lives:3;
+  document.getElementById('sc').textContent=score;document.getElementById('lv').textContent=lives;
+  alive=true;init(lvl);
+  document.getElementById('ss').classList.add('h');document.getElementById('os').classList.add('h');document.getElementById('ws').classList.add('h');
+}
+document.getElementById('sb').addEventListener('click',()=>start(1));
+document.getElementById('rb').addEventListener('click',()=>start(1));
+document.getElementById('nb').addEventListener('click',()=>start(level+1));
+window.addEventListener('keydown',e=>{if(e.code==='Enter'&&!document.getElementById('ss').classList.contains('h')){e.preventDefault();start(1)}});
+function resize(){const a=document.getElementById('arena'),s=Math.min(1,(window.innerWidth-20)/W,(window.innerHeight-80)/H);a.style.transform=`scale(${s})`}
+window.addEventListener('resize',resize);resize();
+init(1);loop();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Type — Emo Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--nc:#00f0ff;--np:#b44aff;--ng:#39ff14;--nr:#ff3355;--ny:#ffe600;--no:#ff6b00;--bg:#080a12}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:auto;background:var(--bg)}
+body{font-family:'Inter',sans-serif;color:#fff;display:flex;flex-direction:column;align-items:center;user-select:none;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background-image:linear-gradient(rgba(0,240,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,.02) 1px,transparent 1px);background-size:40px 40px}
+#hud{width:100%;max-width:700px;display:flex;justify-content:space-between;align-items:center;padding:20px 15px 10px}
+.hi{text-align:center}
+.hl{font:600 9px/1 'Orbitron',monospace;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:5px}
+.hv{font:900 24px/1 'Orbitron',monospace;color:var(--nc);text-shadow:0 0 10px rgba(0,240,255,.5)}
+.hv.g{color:var(--ng);text-shadow:0 0 10px rgba(57,255,20,.5)}
+.hv.r{color:var(--nr);text-shadow:0 0 10px rgba(255,51,85,.5)}
+.hv.y{color:var(--ny);text-shadow:0 0 10px rgba(255,230,0,.5)}
+#title{font:900 16px/1 'Orbitron',monospace;letter-spacing:.12em;color:var(--nc);text-shadow:0 0 12px rgba(0,240,255,.5);text-transform:uppercase}
+#dur{display:flex;gap:8px;margin:8px 0 14px}
+.db{padding:7px 18px;font:700 10px/1 'Orbitron',monospace;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45);background:rgba(0,240,255,.06);border:1px solid rgba(0,240,255,.2);border-radius:6px;cursor:pointer;transition:all .15s}
+.db:hover,.db.a{color:#fff;background:rgba(0,240,255,.15);border-color:var(--nc);box-shadow:0 0 10px rgba(0,240,255,.3)}
+#text-box{width:100%;max-width:680px;background:rgba(0,240,255,.03);border:2px solid rgba(0,240,255,.12);border-radius:12px;padding:28px 24px;margin-bottom:12px;min-height:140px;line-height:2;font:400 18px/2 'JetBrains Mono',monospace;letter-spacing:.02em;position:relative}
+#text-box .char{transition:color .05s}
+.char.correct{color:var(--ng)}
+.char.wrong{color:var(--nr);text-decoration:underline;text-decoration-color:var(--nr)}
+.char.current{border-left:2px solid var(--nc);animation:blink 1s infinite;margin-left:-1px;padding-left:1px}
+.char.pending{color:rgba(255,255,255,.3)}
+@keyframes blink{0%,100%{border-color:var(--nc)}50%{border-color:transparent}}
+#input-box{width:100%;max-width:680px;padding:14px 18px;font:400 16px/1.4 'JetBrains Mono',monospace;background:rgba(0,240,255,.04);border:2px solid rgba(0,240,255,.2);border-radius:10px;color:#fff;outline:none;transition:border-color .2s}
+#input-box:focus{border-color:var(--nc);box-shadow:0 0 15px rgba(0,240,255,.15)}
+#input-box::placeholder{color:rgba(255,255,255,.2)}
+.ov{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(4,5,10,.92);backdrop-filter:blur(6px);text-align:center;padding:24px;transition:opacity .3s}
+.ov.h{opacity:0;pointer-events:none}
+.ov h1{font:900 clamp(26px,5vw,44px)/1.1 'Orbitron',monospace;margin-bottom:10px}
+.ov .nc{color:var(--nc);text-shadow:0 0 15px rgba(0,240,255,.6)}
+.ov .np{color:var(--np);text-shadow:0 0 15px rgba(180,74,255,.6)}
+.ov p{font:400 13px/1.6 'Inter',sans-serif;color:rgba(255,255,255,.5);max-width:320px;margin:6px auto 0}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;width:100%;max-width:280px}
+.stat-box{background:rgba(0,240,255,.05);border:1px solid rgba(0,240,255,.15);border-radius:8px;padding:12px}
+.stat-box .hl{margin-bottom:6px}
+.btn{margin-top:22px;padding:14px 36px;font:700 13px/1 'Orbitron',monospace;letter-spacing:.12em;text-transform:uppercase;color:#000;background:var(--nc);border:none;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(0,240,255,.5);transition:transform .12s}
+.btn:hover{transform:scale(1.05)}.btn:active{transform:scale(.97)}
+#ft{padding:15px 0 20px;text-align:center;font:500 10px/1 'Inter',sans-serif;color:rgba(255,255,255,.2)}
+#ft b{color:var(--nc)}
+</style>
+</head>
+<body>
+<div id="hud">
+  <div class="hi"><div class="hl">WPM</div><div class="hv g" id="wpm">0</div></div>
+  <div id="title">NEON TYPE</div>
+  <div class="hi"><div class="hl">Time</div><div class="hv r" id="timer">30</div></div>
+</div>
+<div id="dur">
+  <button class="db" data-t="15">15s</button>
+  <button class="db a" data-t="30">30s</button>
+  <button class="db" data-t="60">60s</button>
+</div>
+<div id="text-box"></div>
+<input type="text" id="input-box" placeholder="Start typing here..." autocomplete="off" autocapitalize="off" spellcheck="false">
+<div class="ov h" id="rs">
+  <h1><span class="nc">RESULTS</span></h1>
+  <div class="stats">
+    <div class="stat-box"><div class="hl">WPM</div><div class="hv g" id="r-wpm">0</div></div>
+    <div class="stat-box"><div class="hl">Accuracy</div><div class="hv y" id="r-acc">0%</div></div>
+    <div class="stat-box"><div class="hl">Correct</div><div class="hv" id="r-cor">0</div></div>
+    <div class="stat-box"><div class="hl">Wrong</div><div class="hv r" id="r-wrg">0</div></div>
+  </div>
+  <p id="r-msg"></p>
+  <button class="btn" id="r-btn">TRY AGAIN</button>
+</div>
+<div id="ft">Built with ⌨️ by <b>Emo Games</b></div>
+<script>
+(()=>{
+'use strict';
+const WORDS=["the","be","to","of","and","a","in","that","have","it","for","not","on","with","he","as","you","do","at","this","but","his","by","from","they","we","her","she","or","an","will","my","one","all","would","there","their","what","so","up","out","if","about","who","get","which","go","me","when","make","can","like","time","no","just","him","know","take","people","into","year","your","good","some","could","them","see","other","than","then","now","look","only","come","its","over","think","also","back","after","use","two","how","our","work","first","well","way","even","new","want","because","any","these","give","day","most","us","great","code","data","learn","program","function","class","array","loop","debug","stack","queue","tree","graph","sort","search","test","build","deploy","server","client","browser","react","node","python","java","html","style","page","link","type","check","error","fix","run","start","stop","push","pull","merge","branch","commit","save","load","read","write","open","close","true","false","null","void","main","print","input","output","file","path","name","value","index","list","map","set","key","next","prev"];
+
+const $text=document.getElementById('text-box');
+const $input=document.getElementById('input-box');
+const $wpm=document.getElementById('wpm'),$timer=document.getElementById('timer');
+const $rs=document.getElementById('rs');
+
+let duration=30,timeLeft,started,interval,charIndex,correct,wrong,textChars;
+
+document.querySelectorAll('.db').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.db').forEach(x=>x.classList.remove('a'));
+    b.classList.add('a');
+    duration=parseInt(b.dataset.t);
+    resetGame();
+  });
+});
+document.getElementById('r-btn').addEventListener('click',()=>{$rs.classList.add('h');resetGame()});
+
+function genText(){
+  const arr=[];
+  for(let i=0;i<80;i++)arr.push(WORDS[Math.floor(Math.random()*WORDS.length)]);
+  return arr.join(' ');
+}
+
+function renderText(text){
+  $text.innerHTML='';
+  textChars=[];
+  for(let i=0;i<text.length;i++){
+    const span=document.createElement('span');
+    span.className='char pending';
+    span.textContent=text[i];
+    if(i===0)span.classList.add('current');
+    $text.appendChild(span);
+    textChars.push(span);
+  }
+}
+
+function resetGame(){
+  clearInterval(interval);
+  timeLeft=duration;started=false;charIndex=0;correct=0;wrong=0;
+  $timer.textContent=duration;$wpm.textContent=0;
+  $input.value='';$input.disabled=false;$input.focus();
+  renderText(genText());
+}
+
+function startTimer(){
+  started=true;
+  interval=setInterval(()=>{
+    timeLeft--;$timer.textContent=timeLeft;
+    // Live WPM
+    const elapsed=duration-timeLeft;
+    if(elapsed>0)$wpm.textContent=Math.round((correct/5)/(elapsed/60));
+    if(timeLeft<=0){clearInterval(interval);endGame()}
+  },1000);
+}
+
+function endGame(){
+  $input.disabled=true;
+  const wpm=Math.round((correct/5)/(duration/60));
+  const acc=correct+wrong>0?Math.round(correct/(correct+wrong)*100):0;
+  document.getElementById('r-wpm').textContent=wpm;
+  document.getElementById('r-acc').textContent=acc+'%';
+  document.getElementById('r-cor').textContent=correct;
+  document.getElementById('r-wrg').textContent=wrong;
+  const $msg=document.getElementById('r-msg');
+  $msg.textContent=wpm>=80?'🏆 Legendary typist!':wpm>=60?'🔥 Blazing fast!':wpm>=40?'💪 Good speed!':wpm>=25?'Keep practicing!':'Slow and steady...';
+  setTimeout(()=>$rs.classList.remove('h'),300);
+}
+
+$input.addEventListener('input',()=>{
+  if(!started)startTimer();
+  const val=$input.value;
+  const len=val.length;
+  // Process latest character
+  if(charIndex<textChars.length&&len>0){
+    const typed=val[len-1];
+    const expected=textChars[charIndex].textContent;
+    textChars[charIndex].classList.remove('current','pending');
+    if(typed===expected){
+      textChars[charIndex].classList.add('correct');
+      correct++;
+    }else{
+      textChars[charIndex].classList.add('wrong');
+      wrong++;
+    }
+    charIndex++;
+    if(charIndex<textChars.length)textChars[charIndex].classList.add('current');
+    else endGame();
+  }
+});
+
+// Prevent pasting
+$input.addEventListener('paste',e=>e.preventDefault());
+
+resetGame();
+})();
+</script>
+</body>
+</html>

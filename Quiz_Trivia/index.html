@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Trivia — Emo Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--nc:#00f0ff;--np:#b44aff;--ng:#39ff14;--nr:#ff3355;--ny:#ffe600;--no:#ff6b00;--bg:#080a12}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:auto;background:var(--bg)}
+body{font-family:'Inter',sans-serif;color:#fff;display:flex;flex-direction:column;align-items:center;user-select:none;min-height:100vh;padding:15px}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background-image:linear-gradient(rgba(0,240,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,.02) 1px,transparent 1px);background-size:40px 40px}
+#hud{width:100%;max-width:560px;display:flex;justify-content:space-between;align-items:center;padding:10px 0 8px}
+.hl{font:600 9px/1 'Orbitron',monospace;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:5px}
+.hv{font:900 22px/1 'Orbitron',monospace;color:var(--nc);text-shadow:0 0 10px rgba(0,240,255,.5)}
+.hv.g{color:var(--ng)}.hv.r{color:var(--nr)}.hv.y{color:var(--ny)}
+#title{font:900 15px/1 'Orbitron',monospace;letter-spacing:.12em;color:var(--no);text-shadow:0 0 12px rgba(255,107,0,.5);text-transform:uppercase}
+#cat{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0 14px;max-width:560px}
+.cb{padding:6px 14px;font:700 9px/1 'Orbitron',monospace;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.4);background:rgba(255,107,0,.06);border:1px solid rgba(255,107,0,.2);border-radius:6px;cursor:pointer;transition:all .15s}
+.cb:hover,.cb.a{color:#fff;background:rgba(255,107,0,.15);border-color:var(--no);box-shadow:0 0 8px rgba(255,107,0,.3)}
+#progress{width:100%;max-width:560px;height:6px;background:rgba(255,255,255,.05);border-radius:3px;margin-bottom:16px;overflow:hidden}
+#progress-bar{height:100%;background:var(--no);border-radius:3px;transition:width .3s;width:0}
+#q-card{width:100%;max-width:560px;background:rgba(255,107,0,.04);border:2px solid rgba(255,107,0,.15);border-radius:14px;padding:28px 22px;margin-bottom:14px}
+#q-num{font:700 11px/1 'Orbitron',monospace;color:var(--no);letter-spacing:.1em;margin-bottom:10px}
+#q-text{font:600 18px/1.5 'Inter',sans-serif;color:#fff;margin-bottom:20px}
+#opts{display:flex;flex-direction:column;gap:10px}
+.opt{padding:14px 18px;font:500 15px/1.3 'Inter',sans-serif;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.1);border-radius:10px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.opt:hover:not(.locked){border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.08)}
+.opt.correct{border-color:var(--ng);background:rgba(57,255,20,.1);color:var(--ng)}
+.opt.wrong{border-color:var(--nr);background:rgba(255,51,85,.1);color:var(--nr)}
+.opt.locked{cursor:default}
+#explain{margin-top:12px;padding:12px 16px;background:rgba(0,240,255,.05);border-left:3px solid var(--nc);border-radius:0 8px 8px 0;font:400 13px/1.5 'Inter',sans-serif;color:rgba(255,255,255,.6);display:none}
+#next-btn{margin-top:16px;padding:12px 32px;font:700 12px/1 'Orbitron',monospace;letter-spacing:.1em;text-transform:uppercase;color:#000;background:var(--no);border:none;border-radius:8px;cursor:pointer;box-shadow:0 0 12px rgba(255,107,0,.4);transition:transform .12s;display:none;align-self:center}
+#next-btn:hover{transform:scale(1.05)}
+.ov{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(4,5,10,.92);backdrop-filter:blur(6px);text-align:center;padding:24px;transition:opacity .3s}
+.ov.h{opacity:0;pointer-events:none}
+.ov h1{font:900 clamp(26px,5vw,42px)/1.1 'Orbitron',monospace;margin-bottom:10px}
+.ov .nc{color:var(--nc)}.ov .no{color:var(--no);text-shadow:0 0 15px rgba(255,107,0,.5)}
+.ov p{font:400 13px/1.6 'Inter',sans-serif;color:rgba(255,255,255,.5);max-width:300px;margin:6px auto 0}
+.ov .sl{font:700 18px/1 'Orbitron',monospace;color:var(--ng);margin-top:14px}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;width:100%;max-width:260px}
+.res-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:12px}
+.btn{margin-top:20px;padding:14px 36px;font:700 13px/1 'Orbitron',monospace;letter-spacing:.12em;text-transform:uppercase;color:#000;background:var(--no);border:none;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(255,107,0,.5);transition:transform .12s}
+.btn:hover{transform:scale(1.05)}.btn:active{transform:scale(.97)}
+#ft{padding:15px 0;text-align:center;font:500 10px/1 'Inter',sans-serif;color:rgba(255,255,255,.2)}
+#ft b{color:var(--no)}
+</style>
+</head>
+<body>
+<div id="hud">
+  <div><div class="hl">Score</div><div class="hv g" id="sc">0</div></div>
+  <div id="title">NEON TRIVIA</div>
+  <div><div class="hl">Streak</div><div class="hv y" id="st">0</div></div>
+</div>
+<div id="cat"></div>
+<div id="progress"><div id="progress-bar"></div></div>
+<div id="q-card">
+  <div id="q-num">QUESTION 1/10</div>
+  <div id="q-text">Loading...</div>
+  <div id="opts"></div>
+  <div id="explain"></div>
+</div>
+<button id="next-btn">NEXT →</button>
+<div class="ov h" id="rs">
+  <h1><span class="no">TRIVIA</span> <span class="nc">COMPLETE!</span></h1>
+  <div class="res-grid">
+    <div class="res-box"><div class="hl">Score</div><div class="hv g" id="r-sc">0</div></div>
+    <div class="res-box"><div class="hl">Accuracy</div><div class="hv" id="r-acc">0%</div></div>
+    <div class="res-box"><div class="hl">Best Streak</div><div class="hv y" id="r-st">0</div></div>
+    <div class="res-box"><div class="hl">Time</div><div class="hv r" id="r-tm">0s</div></div>
+  </div>
+  <p id="r-msg"></p>
+  <button class="btn" id="r-btn">PLAY AGAIN</button>
+</div>
+<div id="ft">Built with 🧠 by <b>Emo Games</b></div>
+<script>
+(()=>{
+'use strict';
+const QUIZZES={
+  "Tech":[
+    {q:"What does HTML stand for?",o:["Hyper Text Markup Language","High Tech Modern Language","Hyper Transfer Machine Logic","Home Tool Markup Language"],a:0,e:"HTML = Hyper Text Markup Language, the backbone of web pages."},
+    {q:"Who created JavaScript?",o:["Guido van Rossum","Brendan Eich","James Gosling","Dennis Ritchie"],a:1,e:"Brendan Eich created JS in 10 days at Netscape in 1995."},
+    {q:"What does CPU stand for?",o:["Central Processing Unit","Computer Personal Unit","Central Program Utility","Core Processing Unit"],a:0},
+    {q:"Which company developed the Android OS?",o:["Apple","Microsoft","Google","Samsung"],a:2,e:"Android was originally created by Android Inc., later acquired by Google."},
+    {q:"What is the latest version of HTTP?",o:["HTTP/1.1","HTTP/2","HTTP/3","HTTP/4"],a:2,e:"HTTP/3 uses QUIC protocol instead of TCP."},
+    {q:"RAM is a type of...",o:["Permanent storage","Volatile memory","Output device","Processor"],a:1},
+    {q:"Which language is known as the 'mother of all languages'?",o:["Python","C","Java","Assembly"],a:1},
+    {q:"Git was created by...",o:["Bill Gates","Linus Torvalds","Steve Jobs","Mark Zuckerberg"],a:1,e:"Linus Torvalds created Git in 2005 for Linux kernel development."},
+    {q:"What does API stand for?",o:["Application Programming Interface","Advanced Program Integration","Automatic Protocol Interface","Application Process Integration"],a:0},
+    {q:"Which data structure uses FIFO?",o:["Stack","Queue","Tree","Graph"],a:1},
+  ],
+  "Science":[
+    {q:"What is the chemical symbol for gold?",o:["Go","Gd","Au","Ag"],a:2,e:"Au comes from the Latin word 'aurum'."},
+    {q:"Speed of light is approximately...",o:["3×10⁶ m/s","3×10⁸ m/s","3×10¹⁰ m/s","3×10⁴ m/s"],a:1},
+    {q:"What gas do plants absorb?",o:["Oxygen","Nitrogen","Carbon Dioxide","Hydrogen"],a:2},
+    {q:"DNA stands for...",o:["Deoxyribonucleic Acid","Dynamic Nucleic Acid","Digital Network Array","Dual Nitrogen Atom"],a:0},
+    {q:"Which planet is known as the Red Planet?",o:["Venus","Mars","Jupiter","Saturn"],a:1},
+    {q:"The powerhouse of the cell is...",o:["Nucleus","Ribosome","Mitochondria","Golgi body"],a:2},
+    {q:"Newton's 2nd law: F = ?",o:["mv","ma","mg","mc²"],a:1},
+    {q:"What is the hardest natural substance?",o:["Gold","Iron","Diamond","Platinum"],a:2},
+    {q:"How many bones in the adult human body?",o:["186","206","256","306"],a:1},
+    {q:"Which element has atomic number 1?",o:["Helium","Oxygen","Carbon","Hydrogen"],a:3},
+  ],
+  "GK":[
+    {q:"Which is the largest ocean?",o:["Atlantic","Indian","Pacific","Arctic"],a:2},
+    {q:"Capital of Australia?",o:["Sydney","Melbourne","Canberra","Perth"],a:2,e:"Common misconception — it's Canberra, not Sydney."},
+    {q:"Who painted the Mona Lisa?",o:["Picasso","Van Gogh","Leonardo da Vinci","Michelangelo"],a:2},
+    {q:"How many continents are there?",o:["5","6","7","8"],a:2},
+    {q:"Which is the smallest country by area?",o:["Monaco","Vatican City","San Marino","Liechtenstein"],a:1},
+    {q:"Currency of Japan?",o:["Yuan","Won","Yen","Ringgit"],a:2},
+    {q:"Who wrote 'Romeo and Juliet'?",o:["Charles Dickens","Mark Twain","William Shakespeare","Jane Austen"],a:2},
+    {q:"Which blood type is the universal donor?",o:["A+","B+","AB+","O-"],a:3},
+    {q:"The Great Wall is in which country?",o:["Japan","India","China","Korea"],a:2},
+    {q:"Olympics are held every...",o:["2 years","3 years","4 years","5 years"],a:2},
+  ],
+};
+
+const cats=Object.keys(QUIZZES);
+const $cat=document.getElementById('cat');
+const $qNum=document.getElementById('q-num'),$qText=document.getElementById('q-text');
+const $opts=document.getElementById('opts'),$explain=document.getElementById('explain');
+const $next=document.getElementById('next-btn'),$pb=document.getElementById('progress-bar');
+const $sc=document.getElementById('sc'),$st=document.getElementById('st');
+const $rs=document.getElementById('rs');
+
+let currentCat='Tech',questions,qIdx,score,streak,bestStreak,startTime;
+
+cats.forEach(c=>{
+  const btn=document.createElement('button');
+  btn.className='cb'+(c==='Tech'?' a':'');
+  btn.textContent=c;
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.cb').forEach(x=>x.classList.remove('a'));
+    btn.classList.add('a');
+    currentCat=c;startQuiz();
+  });
+  $cat.appendChild(btn);
+});
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function startQuiz(){
+  questions=shuffle([...QUIZZES[currentCat]]).slice(0,10);
+  qIdx=0;score=0;streak=0;bestStreak=0;startTime=Date.now();
+  $sc.textContent=0;$st.textContent=0;
+  $rs.classList.add('h');
+  showQuestion();
+}
+
+function showQuestion(){
+  const q=questions[qIdx];
+  $qNum.textContent=`QUESTION ${qIdx+1}/${questions.length}`;
+  $qText.textContent=q.q;
+  $pb.style.width=((qIdx)/questions.length*100)+'%';
+  $explain.style.display='none';
+  $next.style.display='none';
+  $opts.innerHTML='';
+  q.o.forEach((opt,i)=>{
+    const btn=document.createElement('div');
+    btn.className='opt';
+    btn.textContent=opt;
+    btn.addEventListener('click',()=>answer(i,btn));
+    $opts.appendChild(btn);
+  });
+}
+
+function answer(idx,btn){
+  if(btn.classList.contains('locked'))return;
+  document.querySelectorAll('.opt').forEach(o=>o.classList.add('locked'));
+  const q=questions[qIdx];
+  if(idx===q.a){
+    btn.classList.add('correct');
+    streak++;if(streak>bestStreak)bestStreak=streak;
+    score+=10+streak*2;
+  }else{
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt')[q.a].classList.add('correct');
+    streak=0;
+  }
+  $sc.textContent=score;$st.textContent=streak;
+  if(q.e){$explain.textContent='💡 '+q.e;$explain.style.display='block'}
+  $next.style.display='block';
+}
+
+$next.addEventListener('click',()=>{
+  qIdx++;
+  if(qIdx>=questions.length){endQuiz();return}
+  showQuestion();
+});
+
+function endQuiz(){
+  $pb.style.width='100%';
+  const elapsed=Math.round((Date.now()-startTime)/1000);
+  const correct=questions.filter((_,i)=>document.querySelectorAll('.opt.correct')[i]);
+  document.getElementById('r-sc').textContent=score;
+  document.getElementById('r-acc').textContent=Math.round(score/(questions.length*12)*100)+'%';
+  document.getElementById('r-st').textContent=bestStreak;
+  document.getElementById('r-tm').textContent=elapsed+'s';
+  document.getElementById('r-msg').textContent=score>=100?'🏆 Trivia Master!':score>=70?'🔥 Great knowledge!':score>=40?'💪 Not bad!':'📚 Keep learning!';
+  $rs.classList.remove('h');
+}
+
+document.getElementById('r-btn').addEventListener('click',startQuiz);
+startQuiz();
+})();
+</script>
+</body>
+</html>

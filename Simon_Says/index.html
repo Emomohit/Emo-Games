@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Simon — Emo Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080a12}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:'Inter',sans-serif;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;user-select:none}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background-image:linear-gradient(rgba(180,74,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(180,74,255,.02) 1px,transparent 1px);background-size:40px 40px}
+#title{font:900 16px/1 'Orbitron',monospace;letter-spacing:.12em;color:#b44aff;text-shadow:0 0 12px rgba(180,74,255,.5);text-transform:uppercase;margin-bottom:10px}
+#hud{display:flex;gap:40px;margin-bottom:16px}
+.hi{text-align:center}
+.hl{font:600 9px/1 'Orbitron',monospace;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:5px}
+.hv{font:900 24px/1 'Orbitron',monospace;color:#00f0ff;text-shadow:0 0 10px rgba(0,240,255,.5)}
+.hv.g{color:#39ff14;text-shadow:0 0 10px rgba(57,255,20,.5)}
+#board{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:min(75vw,320px);aspect-ratio:1;margin-bottom:16px}
+.pad{border-radius:16px;cursor:pointer;transition:filter .1s,transform .08s;border:3px solid transparent;-webkit-tap-highlight-color:transparent;position:relative;overflow:hidden}
+.pad::after{content:'';position:absolute;inset:0;border-radius:13px;opacity:0;transition:opacity .15s}
+.pad.lit{transform:scale(.95);filter:brightness(2.5)}
+.pad.lit::after{opacity:1}
+#p0{background:#ff3355;border-color:rgba(255,51,85,.3)}
+#p0.lit::after{background:rgba(255,255,255,.3);box-shadow:0 0 40px #ff3355}
+#p1{background:#39ff14;border-color:rgba(57,255,20,.3)}
+#p1.lit::after{background:rgba(255,255,255,.3);box-shadow:0 0 40px #39ff14}
+#p2{background:#00f0ff;border-color:rgba(0,240,255,.3)}
+#p2.lit::after{background:rgba(255,255,255,.3);box-shadow:0 0 40px #00f0ff}
+#p3{background:#ffe600;border-color:rgba(255,230,0,.3)}
+#p3.lit::after{background:rgba(255,255,255,.3);box-shadow:0 0 40px #ffe600}
+.pad:not(.lit){opacity:.5}
+.pad.active{opacity:1;cursor:pointer}
+#msg{font:700 14px/1 'Orbitron',monospace;color:rgba(255,255,255,.4);height:24px;text-align:center;letter-spacing:.1em}
+.ov{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(4,5,10,.92);backdrop-filter:blur(6px);text-align:center;padding:24px;transition:opacity .3s}
+.ov.h{opacity:0;pointer-events:none}
+.ov h1{font:900 clamp(26px,5vw,44px)/1.1 'Orbitron',monospace;margin-bottom:10px}
+.ov .np{color:#b44aff;text-shadow:0 0 15px rgba(180,74,255,.6)}
+.ov .nc{color:#00f0ff;text-shadow:0 0 15px rgba(0,240,255,.6)}
+.ov p{font:400 13px/1.6 'Inter',sans-serif;color:rgba(255,255,255,.5);max-width:300px;margin:6px auto 0}
+.ov .sl{font:700 20px/1 'Orbitron',monospace;color:#39ff14;margin-top:14px}
+.btn{margin-top:20px;padding:14px 36px;font:700 13px/1 'Orbitron',monospace;letter-spacing:.12em;text-transform:uppercase;color:#000;background:#b44aff;border:none;border-radius:8px;cursor:pointer;box-shadow:0 0 15px rgba(180,74,255,.5);transition:transform .12s}
+.btn:hover{transform:scale(1.05)}.btn:active{transform:scale(.97)}
+#ft{position:fixed;bottom:8px;left:0;right:0;text-align:center;font:500 10px/1 'Inter',sans-serif;color:rgba(255,255,255,.2)}
+#ft b{color:#b44aff}
+</style>
+</head>
+<body>
+<div id="title">NEON SIMON</div>
+<div id="hud">
+  <div class="hi"><div class="hl">Round</div><div class="hv" id="rnd">0</div></div>
+  <div class="hi"><div class="hl">Best</div><div class="hv g" id="best">0</div></div>
+</div>
+<div id="board">
+  <div class="pad" id="p0"></div>
+  <div class="pad" id="p1"></div>
+  <div class="pad" id="p2"></div>
+  <div class="pad" id="p3"></div>
+</div>
+<div id="msg">WATCH THE PATTERN</div>
+<div class="ov" id="ss">
+  <h1><span class="np">NEON</span> <span class="nc">SIMON</span></h1>
+  <p>Watch the sequence of flashing colors, then repeat it! Each round adds one more.</p>
+  <button class="btn" id="sb">START</button>
+</div>
+<div class="ov h" id="os">
+  <h1><span class="np">GAME</span> <span class="nc">OVER</span></h1>
+  <div class="sl" id="fscore">Round: 0</div>
+  <p id="fmsg"></p>
+  <button class="btn" id="rb">TRY AGAIN</button>
+</div>
+<div id="ft">Built with 🎵 by <b>Emo Games</b></div>
+<script>
+(()=>{
+'use strict';
+const pads=[0,1,2,3].map(i=>document.getElementById('p'+i));
+const $rnd=document.getElementById('rnd'),$best=document.getElementById('best');
+const $msg=document.getElementById('msg');
+const $ss=document.getElementById('ss'),$os=document.getElementById('os');
+const TONES=[261.63,329.63,392,523.25];
+let sequence,playerIdx,round,bestRound,locked,audioCtx;
+
+bestRound=parseInt(localStorage.getItem('neon_simon_best')||'0');
+$best.textContent=bestRound;
+
+function playTone(idx,dur=300){
+  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  const osc=audioCtx.createOscillator();
+  const gain=audioCtx.createGain();
+  osc.connect(gain);gain.connect(audioCtx.destination);
+  osc.type='sine';osc.frequency.value=TONES[idx];
+  gain.gain.value=0.15;
+  osc.start();
+  gain.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur/1000);
+  osc.stop(audioCtx.currentTime+dur/1000);
+}
+
+function flash(idx,dur=400){
+  return new Promise(res=>{
+    pads[idx].classList.add('lit');
+    playTone(idx,dur);
+    setTimeout(()=>{pads[idx].classList.remove('lit');setTimeout(res,100)},dur);
+  });
+}
+
+async function playSequence(){
+  locked=true;
+  $msg.textContent='WATCH THE PATTERN';
+  pads.forEach(p=>p.classList.remove('active'));
+  await new Promise(r=>setTimeout(r,500));
+  for(const idx of sequence){
+    await flash(idx,Math.max(200,400-round*15));
+  }
+  locked=false;playerIdx=0;
+  $msg.textContent='YOUR TURN!';
+  pads.forEach(p=>p.classList.add('active'));
+}
+
+function nextRound(){
+  round++;
+  $rnd.textContent=round;
+  sequence.push(Math.floor(Math.random()*4));
+  playSequence();
+}
+
+function gameOver(){
+  locked=true;
+  pads.forEach(p=>p.classList.remove('active'));
+  if(round>bestRound){bestRound=round;localStorage.setItem('neon_simon_best',bestRound);$best.textContent=bestRound}
+  document.getElementById('fscore').textContent=`Round: ${round}`;
+  document.getElementById('fmsg').textContent=round>=15?'🏆 Simon Master!':round>=10?'🔥 Amazing memory!':round>=6?'💪 Good job!':'Keep trying!';
+  setTimeout(()=>$os.classList.remove('h'),600);
+}
+
+pads.forEach((pad,i)=>{
+  pad.addEventListener('pointerdown',e=>{
+    e.preventDefault();
+    if(locked)return;
+    flash(i,200);
+    if(sequence[playerIdx]===i){
+      playerIdx++;
+      if(playerIdx>=sequence.length){
+        locked=true;
+        $msg.textContent='CORRECT! ✅';
+        pads.forEach(p=>p.classList.remove('active'));
+        setTimeout(nextRound,800);
+      }
+    }else{
+      $msg.textContent='WRONG! ❌';
+      // Flash all red
+      pads.forEach(p=>{p.style.filter='hue-rotate(0deg) brightness(0.3)';setTimeout(()=>p.style.filter='',500)});
+      setTimeout(gameOver,600);
+    }
+  });
+});
+
+function startGame(){
+  sequence=[];round=0;playerIdx=0;locked=true;
+  $rnd.textContent=0;
+  $ss.classList.add('h');$os.classList.add('h');
+  setTimeout(nextRound,500);
+}
+
+document.getElementById('sb').addEventListener('click',startGame);
+document.getElementById('rb').addEventListener('click',startGame);
+})();
+</script>
+</body>
+</html>

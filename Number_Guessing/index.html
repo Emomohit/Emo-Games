@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Number — Emo Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--nc:#00f0ff;--np:#b44aff;--ng:#39ff14;--nr:#ff3355;--ny:#ffe600;--no:#ff6b00;--bg:#080a12}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:auto;background:var(--bg)}
+body{font-family:'Inter',sans-serif;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;user-select:none;min-height:100vh;padding:20px}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background-image:linear-gradient(rgba(255,107,0,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,107,0,.02) 1px,transparent 1px);background-size:40px 40px}
+#title{font:900 18px/1 'Orbitron',monospace;letter-spacing:.12em;color:var(--no);text-shadow:0 0 14px rgba(255,107,0,.5);text-transform:uppercase;margin-bottom:8px}
+#sub{font:400 12px/1.4 'Inter',sans-serif;color:rgba(255,255,255,.35);margin-bottom:16px}
+#diff{display:flex;gap:8px;margin-bottom:16px}
+.db{padding:7px 16px;font:700 10px/1 'Orbitron',monospace;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.4);background:rgba(255,107,0,.06);border:1px solid rgba(255,107,0,.2);border-radius:6px;cursor:pointer;transition:all .15s}
+.db:hover,.db.a{color:#fff;background:rgba(255,107,0,.15);border-color:var(--no);box-shadow:0 0 8px rgba(255,107,0,.3)}
+#range-bar{width:100%;max-width:400px;height:10px;background:rgba(255,255,255,.05);border-radius:5px;margin-bottom:6px;position:relative;overflow:hidden}
+#range-fill{height:100%;background:linear-gradient(90deg,var(--nc),var(--no));border-radius:5px;transition:width .3s;width:100%}
+#range-label{font:600 10px/1 'Orbitron',monospace;color:rgba(255,255,255,.3);margin-bottom:20px;letter-spacing:.1em}
+#guess-display{font:900 clamp(60px,15vw,100px)/1 'JetBrains Mono',monospace;color:var(--no);text-shadow:0 0 20px rgba(255,107,0,.4);margin-bottom:8px;min-height:110px;display:flex;align-items:center;justify-content:center}
+#hint{font:700 14px/1.4 'Orbitron',monospace;height:28px;margin-bottom:16px;text-align:center;letter-spacing:.08em;transition:color .2s}
+#input-row{display:flex;gap:10px;margin-bottom:16px}
+#guess-input{width:140px;padding:12px 16px;font:700 20px/1 'JetBrains Mono',monospace;background:rgba(255,107,0,.05);border:2px solid rgba(255,107,0,.2);border-radius:10px;color:#fff;text-align:center;outline:none;transition:border-color .2s}
+#guess-input:focus{border-color:var(--no);box-shadow:0 0 12px rgba(255,107,0,.2)}
+#guess-input::placeholder{color:rgba(255,255,255,.15)}
+.gbtn{padding:12px 24px;font:700 12px/1 'Orbitron',monospace;letter-spacing:.1em;text-transform:uppercase;color:#000;background:var(--no);border:none;border-radius:10px;cursor:pointer;box-shadow:0 0 12px rgba(255,107,0,.4);transition:transform .12s}
+.gbtn:hover{transform:scale(1.05)}.gbtn:active{transform:scale(.97)}
+#history{width:100%;max-width:400px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:12px;min-height:30px}
+.htag{padding:5px 10px;font:700 11px/1 'JetBrains Mono',monospace;border-radius:6px;border:1px solid}
+.htag.hi{color:var(--nr);border-color:rgba(255,51,85,.3);background:rgba(255,51,85,.08)}
+.htag.lo{color:var(--nc);border-color:rgba(0,240,255,.3);background:rgba(0,240,255,.08)}
+.htag.win{color:var(--ng);border-color:rgba(57,255,20,.3);background:rgba(57,255,20,.08)}
+#stats{display:flex;gap:30px;margin-top:8px}
+.si{text-align:center}
+.sl{font:600 9px/1 'Orbitron',monospace;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:5px}
+.sv{font:900 18px/1 'Orbitron',monospace;color:var(--nc);text-shadow:0 0 8px rgba(0,240,255,.4)}
+.sv.g{color:var(--ng)}.sv.y{color:var(--ny)}
+#ft{margin-top:20px;text-align:center;font:500 10px/1 'Inter',sans-serif;color:rgba(255,255,255,.2)}
+#ft b{color:var(--no)}
+</style>
+</head>
+<body>
+<div id="title">NEON NUMBER</div>
+<div id="sub">Guess the secret number!</div>
+<div id="diff">
+  <button class="db" data-r="50">1-50</button>
+  <button class="db a" data-r="100">1-100</button>
+  <button class="db" data-r="500">1-500</button>
+</div>
+<div id="range-bar"><div id="range-fill"></div></div>
+<div id="range-label">RANGE: 1 — 100</div>
+<div id="guess-display">?</div>
+<div id="hint">Enter your first guess!</div>
+<div id="input-row">
+  <input type="number" id="guess-input" placeholder="42" min="1" autocomplete="off">
+  <button class="gbtn" id="guess-btn">GUESS</button>
+</div>
+<div id="history"></div>
+<div id="stats">
+  <div class="si"><div class="sl">Attempts</div><div class="sv" id="att">0</div></div>
+  <div class="si"><div class="sl">Best</div><div class="sv g" id="best">—</div></div>
+  <div class="si"><div class="sl">Wins</div><div class="sv y" id="wins">0</div></div>
+</div>
+<div id="ft">Built with 🔢 by <b>Emo Games</b></div>
+<script>
+(()=>{
+'use strict';
+const $disp=document.getElementById('guess-display'),$hint=document.getElementById('hint');
+const $input=document.getElementById('guess-input'),$btn=document.getElementById('guess-btn');
+const $hist=document.getElementById('history'),$att=document.getElementById('att');
+const $best=document.getElementById('best'),$wins=document.getElementById('wins');
+const $fill=document.getElementById('range-fill'),$rl=document.getElementById('range-label');
+let maxRange=100,secret,attempts,lo,hi,bestScore=Infinity,totalWins=0;
+
+bestScore=parseInt(localStorage.getItem('nn_best')||'Infinity');
+totalWins=parseInt(localStorage.getItem('nn_wins')||'0');
+$best.textContent=isFinite(bestScore)?bestScore:'—';
+$wins.textContent=totalWins;
+
+document.querySelectorAll('.db').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.db').forEach(x=>x.classList.remove('a'));
+    b.classList.add('a');
+    maxRange=parseInt(b.dataset.r);
+    newGame();
+  });
+});
+
+function newGame(){
+  secret=1+Math.floor(Math.random()*maxRange);
+  attempts=0;lo=1;hi=maxRange;
+  $disp.textContent='?';$disp.style.color='#ff6b00';
+  $hint.textContent='Enter your first guess!';$hint.style.color='rgba(255,255,255,.4)';
+  $att.textContent=0;$hist.innerHTML='';$input.value='';$input.disabled=false;$btn.disabled=false;
+  $rl.textContent=`RANGE: ${lo} — ${hi}`;$fill.style.width='100%';
+  $input.focus();
+}
+
+function guess(){
+  const val=parseInt($input.value);
+  if(isNaN(val)||val<1||val>maxRange){$hint.textContent='Enter a valid number!';$hint.style.color='#ffe600';return}
+  attempts++;$att.textContent=attempts;$input.value='';
+  const tag=document.createElement('span');
+  tag.className='htag';tag.textContent=val;
+
+  if(val===secret){
+    tag.classList.add('win');
+    $disp.textContent=secret;$disp.style.color='#39ff14';
+    $hint.textContent=`🎉 Got it in ${attempts} ${attempts===1?'try':'tries'}!`;
+    $hint.style.color='#39ff14';
+    $input.disabled=true;$btn.disabled=true;
+    totalWins++;localStorage.setItem('nn_wins',totalWins);$wins.textContent=totalWins;
+    if(attempts<bestScore){bestScore=attempts;localStorage.setItem('nn_best',bestScore);$best.textContent=bestScore}
+    setTimeout(newGame,2500);
+  }else if(val>secret){
+    tag.classList.add('hi');
+    hi=Math.min(hi,val-1);
+    $disp.textContent='📉';
+    $hint.textContent=`${val} is TOO HIGH! Try lower.`;$hint.style.color='#ff3355';
+  }else{
+    tag.classList.add('lo');
+    lo=Math.max(lo,val+1);
+    $disp.textContent='📈';
+    $hint.textContent=`${val} is TOO LOW! Try higher.`;$hint.style.color='#00f0ff';
+  }
+  $hist.appendChild(tag);
+  $rl.textContent=`RANGE: ${lo} — ${hi}`;
+  const pct=((hi-lo+1)/maxRange)*100;
+  $fill.style.width=Math.max(2,pct)+'%';
+  $input.focus();
+}
+
+$btn.addEventListener('click',guess);
+$input.addEventListener('keydown',e=>{if(e.key==='Enter')guess()});
+newGame();
+})();
+</script>
+</body>
+</html>

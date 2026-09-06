@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Scramble — Emo Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--nc:#00f0ff;--np:#b44aff;--ng:#39ff14;--nr:#ff3355;--ny:#ffe600;--no:#ff6b00;--bg:#080a12}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:auto;background:var(--bg)}
+body{font-family:'Inter',sans-serif;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;user-select:none;min-height:100vh;padding:20px}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background-image:linear-gradient(rgba(57,255,20,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(57,255,20,.02) 1px,transparent 1px);background-size:40px 40px}
+#title{font:900 16px/1 'Orbitron',monospace;letter-spacing:.12em;color:var(--ng);text-shadow:0 0 14px rgba(57,255,20,.5);text-transform:uppercase;margin-bottom:6px}
+#hud{display:flex;gap:35px;margin:10px 0 16px}
+.hi{text-align:center}
+.hl{font:600 9px/1 'Orbitron',monospace;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:5px}
+.hv{font:900 22px/1 'Orbitron',monospace;color:var(--nc);text-shadow:0 0 10px rgba(0,240,255,.5)}
+.hv.g{color:var(--ng)}.hv.r{color:var(--nr)}.hv.y{color:var(--ny)}
+#cat{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
+.cb{padding:6px 14px;font:700 9px/1 'Orbitron',monospace;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.4);background:rgba(57,255,20,.06);border:1px solid rgba(57,255,20,.2);border-radius:6px;cursor:pointer;transition:all .15s}
+.cb:hover,.cb.a{color:#fff;background:rgba(57,255,20,.15);border-color:var(--ng);box-shadow:0 0 8px rgba(57,255,20,.3)}
+#hint-text{font:400 13px/1.4 'Inter',sans-serif;color:rgba(255,255,255,.35);margin-bottom:14px;text-align:center;min-height:20px}
+#scramble-box{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:20px;min-height:60px}
+.letter{width:clamp(40px,10vw,52px);height:clamp(40px,10vw,52px);display:grid;place-items:center;font:900 clamp(20px,5vw,28px)/1 'JetBrains Mono',monospace;background:rgba(57,255,20,.06);border:2px solid rgba(57,255,20,.2);border-radius:10px;color:var(--ng);text-shadow:0 0 8px rgba(57,255,20,.4);cursor:pointer;transition:all .12s;-webkit-tap-highlight-color:transparent}
+.letter:hover{border-color:var(--ng);transform:scale(1.08)}
+.letter.used{opacity:.2;cursor:default;transform:scale(.9)}
+#answer-box{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;min-height:60px}
+.slot{width:clamp(40px,10vw,52px);height:clamp(40px,10vw,52px);display:grid;place-items:center;font:900 clamp(20px,5vw,28px)/1 'JetBrains Mono',monospace;background:rgba(0,240,255,.04);border:2px dashed rgba(0,240,255,.15);border-radius:10px;color:var(--nc);transition:all .15s}
+.slot.filled{border-style:solid;border-color:rgba(0,240,255,.3);background:rgba(0,240,255,.08)}
+.slot.correct{border-color:var(--ng);color:var(--ng);background:rgba(57,255,20,.1)}
+.slot.wrong{border-color:var(--nr);color:var(--nr);background:rgba(255,51,85,.1)}
+#controls{display:flex;gap:10px;margin-bottom:14px}
+.cbtn{padding:10px 20px;font:700 11px/1 'Orbitron',monospace;letter-spacing:.08em;text-transform:uppercase;border:none;border-radius:8px;cursor:pointer;transition:transform .12s}
+.cbtn:hover{transform:scale(1.05)}.cbtn:active{transform:scale(.97)}
+#submit-btn{color:#000;background:var(--ng);box-shadow:0 0 10px rgba(57,255,20,.4)}
+#clear-btn{color:var(--nc);background:rgba(0,240,255,.1);border:1px solid rgba(0,240,255,.2)}
+#skip-btn{color:var(--ny);background:rgba(255,230,0,.1);border:1px solid rgba(255,230,0,.2)}
+#hint-btn{color:var(--np);background:rgba(180,74,255,.1);border:1px solid rgba(180,74,255,.2)}
+#feedback{font:700 14px/1 'Orbitron',monospace;height:28px;text-align:center;margin-bottom:8px}
+#ft{margin-top:15px;text-align:center;font:500 10px/1 'Inter',sans-serif;color:rgba(255,255,255,.2)}
+#ft b{color:var(--ng)}
+</style>
+</head>
+<body>
+<div id="title">NEON SCRAMBLE</div>
+<div id="hud">
+  <div class="hi"><div class="hl">Score</div><div class="hv g" id="sc">0</div></div>
+  <div class="hi"><div class="hl">Timer</div><div class="hv r" id="timer">60</div></div>
+  <div class="hi"><div class="hl">Solved</div><div class="hv y" id="solved">0</div></div>
+</div>
+<div id="cat"></div>
+<div id="hint-text"></div>
+<div id="scramble-box"></div>
+<div id="answer-box"></div>
+<div id="controls">
+  <button class="cbtn" id="submit-btn">CHECK</button>
+  <button class="cbtn" id="clear-btn">CLEAR</button>
+  <button class="cbtn" id="hint-btn">HINT</button>
+  <button class="cbtn" id="skip-btn">SKIP</button>
+</div>
+<div id="feedback"></div>
+<div id="ft">Built with 🔤 by <b>Emo Games</b></div>
+<script>
+(()=>{
+'use strict';
+const WORDS={
+  "Coding":["function","variable","boolean","string","integer","object","array","method","class","module","import","return","promise","async","syntax","server","client","deploy","docker","kernel"],
+  "Animals":["dolphin","penguin","giraffe","elephant","butterfly","crocodile","kangaroo","flamingo","cheetah","panther","hamster","octopus","chameleon","peacock","scorpion","parrot","gorilla","lobster","mongoose","tortoise"],
+  "Science":["gravity","molecule","neutron","electron","quantum","nucleus","photon","catalyst","isotope","polymer","entropy","protein","genome","eclipse","volcano","magnet","circuit","plasma","crystal","hormone"],
+};
+const cats=Object.keys(WORDS);
+const $scram=document.getElementById('scramble-box'),$ans=document.getElementById('answer-box');
+const $fb=document.getElementById('feedback'),$hint=document.getElementById('hint-text');
+const $sc=document.getElementById('sc'),$timer=document.getElementById('timer'),$solved=document.getElementById('solved');
+const $cat=document.getElementById('cat');
+
+let currentCat='Coding',word,scrambled,answer,score=0,solvedCount=0,timeLeft=60,interval,usedWords=[];
+
+cats.forEach(c=>{
+  const btn=document.createElement('button');
+  btn.className='cb'+(c==='Coding'?' a':'');
+  btn.textContent=c;
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.cb').forEach(x=>x.classList.remove('a'));
+    btn.classList.add('a');
+    currentCat=c;usedWords=[];startGame();
+  });
+  $cat.appendChild(btn);
+});
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+
+function pickWord(){
+  const pool=WORDS[currentCat].filter(w=>!usedWords.includes(w));
+  if(pool.length===0)usedWords=[];
+  const available=pool.length>0?pool:WORDS[currentCat];
+  word=available[Math.floor(Math.random()*available.length)].toUpperCase();
+  usedWords.push(word);
+  do{scrambled=shuffle(word.split(''))}while(scrambled.join('')===word);
+  answer=[];
+  renderScramble();renderAnswer();
+  $fb.textContent='';$hint.textContent='';
+}
+
+function renderScramble(){
+  $scram.innerHTML='';
+  scrambled.forEach((ch,i)=>{
+    const el=document.createElement('div');
+    el.className='letter'+(answer.includes(i)?' used':'');
+    el.textContent=ch;
+    el.addEventListener('click',()=>{
+      if(answer.includes(i))return;
+      answer.push(i);
+      renderScramble();renderAnswer();
+    });
+    $scram.appendChild(el);
+  });
+}
+
+function renderAnswer(){
+  $ans.innerHTML='';
+  for(let i=0;i<word.length;i++){
+    const el=document.createElement('div');
+    el.className='slot'+(answer[i]!==undefined?' filled':'');
+    el.textContent=answer[i]!==undefined?scrambled[answer[i]]:'';
+    el.addEventListener('click',()=>{
+      if(answer[i]===undefined)return;
+      answer.splice(i,1);
+      renderScramble();renderAnswer();
+    });
+    $ans.appendChild(el);
+  }
+}
+
+function checkAnswer(){
+  if(answer.length!==word.length)return;
+  const guess=answer.map(i=>scrambled[i]).join('');
+  const slots=document.querySelectorAll('.slot');
+  if(guess===word){
+    slots.forEach(s=>s.classList.add('correct'));
+    score+=word.length*5;solvedCount++;
+    $sc.textContent=score;$solved.textContent=solvedCount;
+    $fb.textContent='✅ CORRECT!';$fb.style.color='#39ff14';
+    setTimeout(pickWord,800);
+  }else{
+    slots.forEach((s,i)=>s.classList.add(scrambled[answer[i]]===word[i]?'correct':'wrong'));
+    $fb.textContent='❌ WRONG!';$fb.style.color='#ff3355';
+    setTimeout(()=>{answer=[];renderScramble();renderAnswer();$fb.textContent=''},600);
+  }
+}
+
+document.getElementById('submit-btn').addEventListener('click',checkAnswer);
+document.getElementById('clear-btn').addEventListener('click',()=>{answer=[];renderScramble();renderAnswer();$fb.textContent=''});
+document.getElementById('skip-btn').addEventListener('click',()=>{$fb.textContent=`Skipped! Word was: ${word}`;$fb.style.color='#ffe600';setTimeout(pickWord,1000)});
+document.getElementById('hint-btn').addEventListener('click',()=>{$hint.textContent=`💡 First letter: ${word[0]}, Length: ${word.length}`});
+
+function startGame(){
+  clearInterval(interval);
+  score=0;solvedCount=0;timeLeft=60;
+  $sc.textContent=0;$solved.textContent=0;$timer.textContent=60;
+  pickWord();
+  interval=setInterval(()=>{
+    timeLeft--;$timer.textContent=timeLeft;
+    if(timeLeft<=0){
+      clearInterval(interval);
+      $fb.textContent=`⏰ Time's up! Solved: ${solvedCount}`;$fb.style.color='#00f0ff';
+      $scram.innerHTML=`<div style="font:700 16px/2 'Orbitron',monospace;color:#ff6b00">Score: ${score} | Solved: ${solvedCount}</div>`;
+      $ans.innerHTML='';
+      setTimeout(startGame,3000);
+    }
+  },1000);
+}
+startGame();
+})();
+</script>
+</body>
+</html>

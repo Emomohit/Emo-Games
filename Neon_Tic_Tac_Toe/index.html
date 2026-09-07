@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Tic-Tac-Toe | Emo Games</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #050510;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Animated Background Gradients */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(20, 10, 40, 1) 0%, rgba(5, 5, 16, 1) 100%);
+            z-index: -1;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #fff;
+            text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff;
+            animation: pulse-glow 2s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            0% { text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff; }
+            100% { text-shadow: 0 0 15px #0ff, 0 0 30px #0ff, 0 0 50px #0ff, 0 0 70px #0ff; }
+        }
+
+        .status {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            min-height: 2rem;
+            text-shadow: 0 0 10px #f0f;
+            color: #f0f;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2), inset 0 0 20px rgba(0, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            background: rgba(10, 10, 20, 0.8);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .cell:hover {
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5), inset 0 0 15px rgba(0, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .cell.x {
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .cell.o {
+            color: #f0f;
+            text-shadow: 0 0 10px #f0f, 0 0 20px #f0f;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .controls {
+            margin-top: 40px;
+            display: flex;
+            gap: 20px;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            background: transparent;
+            color: #0ff;
+            border: 2px solid #0ff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1);
+        }
+
+        button:hover {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6), inset 0 0 20px rgba(0, 255, 255, 0.3);
+            text-shadow: 0 0 5px #fff;
+            transform: translateY(-2px);
+        }
+
+        .winning-cell {
+            background: rgba(255, 255, 255, 0.1) !important;
+            box-shadow: 0 0 30px #fff, inset 0 0 30px #fff !important;
+            border-color: #fff !important;
+            animation: flashWin 1s infinite alternate !important;
+        }
+
+        @keyframes flashWin {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); z-index: 10; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Neon Tic-Tac-Toe</h1>
+    <div class="status" id="status">Player X's Turn</div>
+
+    <div class="board" id="board">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
+    </div>
+
+    <div class="controls">
+        <button id="resetBtn">Reset Game</button>
+    </div>
+
+    <script>
+        const cells = document.querySelectorAll('.cell');
+        const statusText = document.getElementById('status');
+        const resetBtn = document.getElementById('resetBtn');
+
+        let board = ["", "", "", "", "", "", "", "", ""];
+        let currentPlayer = "X";
+        let gameActive = true;
+
+        const winningConditions = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        const initializeGame = () => {
+            cells.forEach(cell => cell.addEventListener('click', cellClicked));
+            resetBtn.addEventListener('click', restartGame);
+            statusText.textContent = `Player ${currentPlayer}'s Turn`;
+            updateStatusColor();
+        };
+
+        const cellClicked = (e) => {
+            const cellIndex = e.target.getAttribute('data-index');
+
+            if (board[cellIndex] !== "" || !gameActive) {
+                return;
+            }
+
+            updateCell(e.target, cellIndex);
+            checkWinner();
+        };
+
+        const updateCell = (cell, index) => {
+            board[index] = currentPlayer;
+            cell.textContent = currentPlayer;
+            cell.classList.add(currentPlayer.toLowerCase());
+        };
+
+        const changePlayer = () => {
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+            statusText.textContent = `Player ${currentPlayer}'s Turn`;
+            updateStatusColor();
+        };
+
+        const updateStatusColor = () => {
+            if(currentPlayer === "X") {
+                statusText.style.color = "#0ff";
+                statusText.style.textShadow = "0 0 10px #0ff";
+            } else {
+                statusText.style.color = "#f0f";
+                statusText.style.textShadow = "0 0 10px #f0f";
+            }
+        };
+
+        const checkWinner = () => {
+            let roundWon = false;
+            let winningCells = [];
+
+            for (let i = 0; i < winningConditions.length; i++) {
+                const condition = winningConditions[i];
+                const cellA = board[condition[0]];
+                const cellB = board[condition[1]];
+                const cellC = board[condition[2]];
+
+                if (cellA === "" || cellB === "" || cellC === "") {
+                    continue;
+                }
+                if (cellA === cellB && cellB === cellC) {
+                    roundWon = true;
+                    winningCells = condition;
+                    break;
+                }
+            }
+
+            if (roundWon) {
+                statusText.textContent = `${currentPlayer} WINS!`;
+                gameActive = false;
+                statusText.style.color = "#fff";
+                statusText.style.textShadow = "0 0 20px #fff, 0 0 40px #fff";
+                
+                winningCells.forEach(index => {
+                    cells[index].classList.add('winning-cell');
+                });
+                return;
+            }
+
+            if (!board.includes("")) {
+                statusText.textContent = `It's a DRAW!`;
+                statusText.style.color = "#ff0";
+                statusText.style.textShadow = "0 0 10px #ff0";
+                gameActive = false;
+                return;
+            }
+
+            changePlayer();
+        };
+
+        const restartGame = () => {
+            currentPlayer = "X";
+            board = ["", "", "", "", "", "", "", "", ""];
+            gameActive = true;
+            statusText.textContent = `Player ${currentPlayer}'s Turn`;
+            updateStatusColor();
+            
+            cells.forEach(cell => {
+                cell.textContent = "";
+                cell.classList.remove('x', 'o', 'winning-cell');
+            });
+        };
+
+        initializeGame();
+    </script>
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Math Sprint | Emo Games</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #050510;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Animated grid background */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                linear-gradient(rgba(255, 0, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 0, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -1;
+            transform: perspective(600px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+            animation: moveGrid 15s linear infinite;
+        }
+
+        @keyframes moveGrid {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 1000px; }
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #fff;
+            text-shadow: 0 0 10px #f0f, 0 0 20px #f0f, 0 0 40px #f0f;
+            animation: neonPulse 1.5s infinite alternate;
+        }
+
+        @keyframes neonPulse {
+            0% { text-shadow: 0 0 10px #f0f, 0 0 20px #f0f, 0 0 40px #f0f; }
+            100% { text-shadow: 0 0 15px #f0f, 0 0 30px #f0f, 0 0 50px #f0f, 0 0 70px #f0f; }
+        }
+
+        .stats-container {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: rgba(255, 0, 255, 0.1);
+            padding: 15px 30px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 0, 255, 0.3);
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.2), inset 0 0 10px rgba(255, 0, 255, 0.1);
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #ccc;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+        }
+
+        #timer {
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff;
+        }
+
+        #score {
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        .game-area {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid #0ff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3), inset 0 0 20px rgba(0, 255, 255, 0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .problem {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: #fff;
+            text-shadow: 0 0 15px #fff;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 2rem;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid #0ff;
+            border-radius: 10px;
+            color: #fff;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 15px rgba(0, 255, 255, 0.2);
+        }
+
+        .answer-input:focus {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), inset 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        /* Shake animation for wrong answer */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+            100% { transform: translateX(0); }
+        }
+
+        .shake {
+            animation: shake 0.4s;
+            border-color: #f00 !important;
+            box-shadow: 0 0 20px #f00, inset 0 0 20px #f00 !important;
+        }
+
+        /* Success animation */
+        @keyframes successPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); border-color: #0f0; box-shadow: 0 0 30px #0f0, inset 0 0 20px #0f0; }
+            100% { transform: scale(1); }
+        }
+
+        .success {
+            animation: successPop 0.3s;
+        }
+
+        .controls {
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            background: transparent;
+            color: #0ff;
+            border: 2px solid #0ff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1);
+        }
+
+        button:hover {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.6), inset 0 0 20px rgba(0, 255, 255, 0.3);
+            text-shadow: 0 0 8px #fff;
+            transform: translateY(-2px);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .game-over-text {
+            font-size: 2rem;
+            color: #f0f;
+            text-shadow: 0 0 10px #f0f;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Neon Math Sprint</h1>
+
+    <div class="stats-container">
+        <div class="stat-box">
+            <div class="stat-label">Time</div>
+            <div class="stat-value" id="timer">30</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Score</div>
+            <div class="stat-value" id="score">0</div>
+        </div>
+    </div>
+
+    <!-- Start Screen -->
+    <div class="game-area" id="start-screen">
+        <div class="problem">Solve as many as you can in 30 seconds!</div>
+        <button id="start-btn">Start Sprint</button>
+    </div>
+
+    <!-- Active Game Screen -->
+    <div class="game-area hidden" id="active-screen">
+        <div class="problem" id="problem">5 + 5</div>
+        <input type="number" class="answer-input" id="answer-input" placeholder="Type answer and press Enter" autocomplete="off">
+    </div>
+
+    <!-- Game Over Screen -->
+    <div class="game-area hidden" id="game-over-screen">
+        <div class="game-over-text">Time's Up!</div>
+        <div class="problem">Final Score: <span id="final-score">0</span></div>
+        <button id="restart-btn">Play Again</button>
+    </div>
+
+    <script>
+        const timerEl = document.getElementById('timer');
+        const scoreEl = document.getElementById('score');
+        const problemEl = document.getElementById('problem');
+        const answerInput = document.getElementById('answer-input');
+        
+        const startScreen = document.getElementById('start-screen');
+        const activeScreen = document.getElementById('active-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const finalScoreEl = document.getElementById('final-score');
+
+        document.getElementById('start-btn').addEventListener('click', startGame);
+        document.getElementById('restart-btn').addEventListener('click', startGame);
+        
+        answerInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+        let currentAnswer = 0;
+        let score = 0;
+        let timeLeft = 30;
+        let timerInterval;
+
+        function startGame() {
+            score = 0;
+            timeLeft = 30;
+            scoreEl.textContent = score;
+            timerEl.textContent = timeLeft;
+
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            activeScreen.classList.remove('hidden');
+
+            answerInput.value = '';
+            answerInput.focus();
+
+            generateProblem();
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = timeLeft;
+                
+                if (timeLeft <= 5) {
+                    timerEl.style.color = '#f00';
+                    timerEl.style.textShadow = '0 0 10px #f00';
+                } else {
+                    timerEl.style.color = '#0ff';
+                    timerEl.style.textShadow = '0 0 10px #0ff';
+                }
+
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function generateProblem() {
+            const operations = ['+', '-', '*'];
+            const op = operations[Math.floor(Math.random() * operations.length)];
+            let num1, num2;
+
+            if (op === '+') {
+                num1 = Math.floor(Math.random() * 50) + 1;
+                num2 = Math.floor(Math.random() * 50) + 1;
+                currentAnswer = num1 + num2;
+            } else if (op === '-') {
+                num1 = Math.floor(Math.random() * 50) + 20;
+                num2 = Math.floor(Math.random() * num1); // Ensure positive result
+                currentAnswer = num1 - num2;
+            } else if (op === '*') {
+                num1 = Math.floor(Math.random() * 12) + 2;
+                num2 = Math.floor(Math.random() * 12) + 2;
+                currentAnswer = num1 * num2;
+            }
+
+            problemEl.textContent = `${num1} ${op} ${num2}`;
+        }
+
+        function checkAnswer() {
+            const userAnswer = parseInt(answerInput.value);
+
+            if (isNaN(userAnswer)) return;
+
+            if (userAnswer === currentAnswer) {
+                // Correct
+                score++;
+                scoreEl.textContent = score;
+                answerInput.value = '';
+                
+                activeScreen.classList.remove('success');
+                void activeScreen.offsetWidth; // Trigger reflow
+                activeScreen.classList.add('success');
+                
+                generateProblem();
+            } else {
+                // Incorrect
+                answerInput.classList.remove('shake');
+                void answerInput.offsetWidth; // Trigger reflow
+                answerInput.classList.add('shake');
+                answerInput.value = '';
+            }
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            activeScreen.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+            finalScoreEl.textContent = score;
+        }
+    </script>
+</body>
+</html>
